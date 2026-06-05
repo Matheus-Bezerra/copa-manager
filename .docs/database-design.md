@@ -1,0 +1,601 @@
+# Database Design
+
+## Visão Geral
+
+O Copa Manager utiliza PostgreSQL como banco de dados relacional.
+
+O sistema suporta múltiplos campeonatos independentes na mesma plataforma.
+
+Todos os identificadores utilizam ULID.
+
+Este documento descreve exclusivamente a persistência dos dados e suas relações.
+
+---
+
+# Convenções
+
+## Identificadores
+
+Todas as entidades utilizam ULID como chave primária.
+
+Exemplo:
+
+```text
+01JX4S8Y6VABM4QZW4X2N4W4B1
+```
+
+---
+
+## Auditoria
+
+As entidades principais devem possuir:
+
+* created_at
+* updated_at
+
+Quando aplicável:
+
+* created_by
+* updated_by
+
+---
+
+## Soft Delete
+
+As entidades administrativas devem suportar exclusão lógica.
+
+Campo padrão:
+
+* deleted_at
+
+---
+
+# Authentication
+
+## Users
+
+Representa usuários autenticados.
+
+### Columns
+
+* id
+* name
+* email
+* password_hash
+* google_id
+* avatar_url
+* status
+* created_at
+* updated_at
+* deleted_at
+
+### Constraints
+
+* email unique
+* google_id unique nullable
+
+### Notes
+
+* password_hash pode ser nulo para login exclusivamente Google.
+* google_id pode ser nulo para login exclusivamente local.
+
+### Indexes
+
+* email
+* google_id
+* status
+
+---
+
+## Password Reset Tokens
+
+Tokens para redefinição de senha.
+
+### Columns
+
+* id
+* user_id
+* code
+* expires_at
+* used_at
+* created_at
+
+### Constraints
+
+* code unique
+
+### Indexes
+
+* user_id
+* code
+
+---
+
+## Refresh Tokens
+
+Sessões persistentes de autenticação.
+
+### Columns
+
+* id
+* user_id
+* token_hash
+* expires_at
+* revoked_at
+* last_used_at
+* created_at
+
+### Indexes
+
+* user_id
+* expires_at
+
+### Notes
+
+* O token real nunca deve ser armazenado.
+* Apenas o hash do refresh token deve ser persistido.
+
+---
+
+# Championships
+
+## Championships
+
+Representa campeonatos.
+
+### Columns
+
+* id
+* owner_user_id
+* name
+* slug
+* description
+* regulations
+* start_date
+* end_date
+* status
+* created_at
+* updated_at
+* deleted_at
+
+### Constraints
+
+* slug unique
+
+### Indexes
+
+* slug
+* owner_user_id
+* status
+
+---
+
+## Championship Members
+
+Usuários com permissões administrativas.
+
+### Columns
+
+* id
+* championship_id
+* user_id
+* role
+* created_at
+
+### Constraints
+
+* unique(championship_id, user_id)
+
+### Indexes
+
+* championship_id
+* user_id
+
+---
+
+## Invitations
+
+Convites administrativos.
+
+### Columns
+
+* id
+* championship_id
+* email
+* role
+* token
+* status
+* expires_at
+* accepted_at
+* created_at
+
+### Constraints
+
+* token unique
+
+### Indexes
+
+* championship_id
+* email
+* token
+
+---
+
+# Championship Rules
+
+## Championship Rules
+
+Configurações personalizadas do campeonato.
+
+### Columns
+
+* id
+* championship_id
+* win_points
+* draw_points
+* penalty_bonus_points
+* yellow_cards_for_suspension
+* red_card_suspension_games
+* created_at
+* updated_at
+
+### Constraints
+
+* unique(championship_id)
+
+---
+
+## Tie Breaker Rules
+
+Critérios de desempate.
+
+### Columns
+
+* id
+* championship_id
+* position
+* criterion
+
+### Example
+
+```text
+1 - Wins
+2 - GoalDifference
+3 - GoalsScored
+4 - HeadToHead
+```
+
+### Indexes
+
+* championship_id
+
+---
+
+# Teams
+
+## Teams
+
+### Columns
+
+* id
+* championship_id
+* name
+* short_name
+* logo_url
+* primary_color
+* created_at
+* updated_at
+* deleted_at
+
+### Indexes
+
+* championship_id
+* name
+
+---
+
+# Players
+
+## Players
+
+### Columns
+
+* id
+* team_id
+* name
+* shirt_number
+* created_at
+* updated_at
+* deleted_at
+
+### Indexes
+
+* team_id
+* name
+
+---
+
+## Player Statistics
+
+Estatísticas consolidadas do jogador.
+
+### Columns
+
+* id
+* player_id
+* matches_played
+* goals
+* assists
+* yellow_cards
+* red_cards
+* match_mvps
+* created_at
+* updated_at
+
+### Constraints
+
+* unique(player_id)
+
+### Indexes
+
+* goals
+* match_mvps
+
+---
+
+# Competition Structure
+
+## Stages
+
+Fases do campeonato.
+
+### Columns
+
+* id
+* championship_id
+* name
+* type
+* display_order
+* created_at
+
+### Indexes
+
+* championship_id
+* display_order
+
+---
+
+## Matches
+
+Partidas.
+
+### Columns
+
+* id
+* championship_id
+* stage_id
+* home_team_id
+* away_team_id
+* scheduled_at
+* status
+* created_at
+* updated_at
+
+### Indexes
+
+* championship_id
+* stage_id
+* scheduled_at
+
+---
+
+## Match Results
+
+Resultado oficial.
+
+### Columns
+
+* id
+* match_id
+* home_score
+* away_score
+* home_penalty_score
+* away_penalty_score
+* created_at
+
+### Constraints
+
+* unique(match_id)
+
+---
+
+## Match Events
+
+Eventos registrados na partida.
+
+### Columns
+
+* id
+* match_id
+* player_id
+* team_id
+* event_type
+* minute
+* notes
+* created_at
+
+### Examples
+
+* Goal
+* Yellow Card
+* Red Card
+* MVP
+
+### Indexes
+
+* match_id
+* player_id
+* event_type
+
+---
+
+# Rankings
+
+## Standings
+
+Classificação geral.
+
+### Columns
+
+* id
+* championship_id
+* team_id
+* position
+* points
+* wins
+* draws
+* losses
+* goals_scored
+* goals_conceded
+* goal_difference
+* updated_at
+
+### Constraints
+
+* unique(championship_id, team_id)
+
+### Indexes
+
+* championship_id
+* position
+
+---
+
+# Awards
+
+## Awards
+
+Premiações concedidas.
+
+### Columns
+
+* id
+* championship_id
+* player_id
+* award_type
+* created_at
+
+### Indexes
+
+* championship_id
+* player_id
+
+---
+
+# Enums
+
+## user_status
+
+* ACTIVE
+* BLOCKED
+
+---
+
+## championship_status
+
+* DRAFT
+* OPEN
+* IN_PROGRESS
+* FINISHED
+* ARCHIVED
+
+---
+
+## championship_role
+
+* OWNER
+* ADMINISTRATOR
+* ORGANIZER
+
+---
+
+## invitation_status
+
+* PENDING
+* ACCEPTED
+* EXPIRED
+* REVOKED
+
+---
+
+## stage_type
+
+* GROUP_STAGE
+* ROUND_ROBIN
+* DOUBLE_ROUND_ROBIN
+* SEMI_FINAL
+* FINAL
+* KNOCKOUT
+
+---
+
+## match_status
+
+* SCHEDULED
+* IN_PROGRESS
+* FINISHED
+* CANCELLED
+
+---
+
+## match_event_type
+
+* GOAL
+* YELLOW_CARD
+* RED_CARD
+* MVP
+
+---
+
+## award_type
+
+* TOP_SCORER
+* MATCH_MVP
+* TOURNAMENT_MVP
+* FAIR_PLAY
+
+---
+
+# Relacionamentos Principais
+
+```text
+User
+ ├─ Championship (Owner)
+ ├─ ChampionshipMember
+ ├─ PasswordResetToken
+ └─ RefreshToken
+
+Championship
+ ├─ ChampionshipRules
+ ├─ TieBreakerRules
+ ├─ ChampionshipMembers
+ ├─ Invitations
+ ├─ Teams
+ ├─ Stages
+ ├─ Matches
+ ├─ Standings
+ └─ Awards
+
+Team
+ ├─ Players
+ └─ Matches
+
+Player
+ ├─ PlayerStatistics
+ ├─ MatchEvents
+ └─ Awards
+
+Match
+ ├─ MatchResult
+ └─ MatchEvents
+```
