@@ -13,6 +13,7 @@ module.exports = defineConfig(
       'build/**',
       'dist/**',
       'generated/**',
+      'prisma/generated/**',
       'node_modules/**',
       'eslint.config.cjs',
       'prettier.config.cjs',

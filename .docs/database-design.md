@@ -121,7 +121,6 @@ Sessões persistentes de autenticação.
 * user_id
 * token_hash
 * expires_at
-* revoked_at
 * last_used_at
 * created_at
 
@@ -134,6 +133,7 @@ Sessões persistentes de autenticação.
 
 * O token real nunca deve ser armazenado.
 * Apenas o hash do refresh token deve ser persistido.
+* Na rotação de sessão ou logout, o registro do refresh token deve ser **removido** (hard delete), não revogado logicamente.
 
 ---
 

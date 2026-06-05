@@ -31,6 +31,9 @@ services:
       PORT: 3333
       DATABASE_URL: postgresql://copa_manager:copa_manager@db:5432/copa_manager?schema=public
       JWT_SECRET: change-me-in-production
+      JWT_EXPIRES_IN: 15m
+      REFRESH_TOKEN_EXPIRES_DAYS: 7
+      ENABLE_SWAGGER: 'true'
     depends_on:
       db:
         condition: service_healthy

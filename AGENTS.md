@@ -49,3 +49,8 @@ Define a arquitetura do frontend.
 - Não criar entidades fora do domínio documentado.
 - Não alterar contratos sem atualizar a documentação.
 - Em caso de conflito, seguir a ordem de prioridade acima.
+
+## Convenções de código (backend)
+
+- **Imports:** não usar sufixo `.js` nos paths de import (ex.: `@/lib/zod`, não `@/lib/zod.js`).
+- **Validadores reutilizáveis:** ficam em `backend/src/utils/validators/`, um arquivo por função (ex.: `validate-uppercase.ts`).
