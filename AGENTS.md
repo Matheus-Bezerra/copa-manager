@@ -38,10 +38,10 @@ Define o contrato entre frontend e backend.
 Define a arquitetura do backend.
 (Estrutura de pastas, camadas e responsabilidades.)
 
-### architecture-frontend.md (vai ser criado futuramente)
+### architecture-frontend.md
 
 Define a arquitetura do frontend.
-(Estrutura de páginas, componentes, rotas e organização.)
+(Estrutura de páginas, componentes, rotas, ESLint, Prettier e organização.)
 
 ## Regras
 

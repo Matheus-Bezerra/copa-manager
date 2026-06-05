@@ -23,6 +23,53 @@ Não utilizar NestJS, microservices ou arquiteturas distribuídas.
 * PostgreSQL
 * JWT + Refresh Token
 * Docker
+* ESLint (lint)
+* Prettier (formatação)
+
+---
+
+# Padronização de Código
+
+O backend utiliza **ESLint + Prettier**. Não utilizar Biome.
+
+## Prettier
+
+Responsável pela formatação completa do código. Executado via script:
+
+```bash
+npm run format
+```
+
+Configuração em `prettier.config.cjs`:
+
+```js
+module.exports = {
+  printWidth: 100,
+  tabWidth: 2,
+  singleQuote: true,
+  bracketSameLine: true,
+  trailingComma: 'es5',
+  semi: true,
+};
+```
+
+## ESLint
+
+Responsável por lint e correções no save (indentação, linhas em branco).
+
+Regras principais:
+
+* `prettier/prettier`: **off** no save — evita que o Prettier remova linhas em branco intencionais ao salvar
+* `@stylistic/indent`: corrige indentação no save
+* `no-multiple-empty-lines`: permite no máximo **1** linha em branco consecutiva
+
+Formatação completa fica a cargo do `npm run format`, não do save.
+
+## Editor (`.vscode/`)
+
+* Extensão recomendada: `esbenp.prettier-vscode`
+* `formatOnSave`: habilitado via Prettier
+* `prettier.configPath`: aponta para `backend/prettier.config.cjs`
 
 ---
 
@@ -99,6 +146,8 @@ copa-manager-api/
 ├─ build/
 ├─ Dockerfile
 ├─ docker-compose.yml
+├─ eslint.config.cjs
+├─ prettier.config.cjs
 ├─ tsconfig.json
 ├─ tsup.config.ts
 └─ package.json

@@ -1,0 +1,16 @@
+node_modules/
+build/
+generated/
+dist/
+.env
+.env.local
+.env.*.local
+
+*.log
+npm-debug.log*
+
+.DS_Store
+.idea/
+coverage/
+.nyc_output/
+.gitkeep
