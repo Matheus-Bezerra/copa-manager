@@ -406,6 +406,56 @@ Não concede acesso direto aos recursos da API.
 
 ---
 
+## Accept Invitation
+
+### POST
+
+```http
+/invitations/accept
+```
+
+### Request
+
+```json
+{
+  "token": "invitation-token-from-email"
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "member": {
+      "id": "01HXYZ...",
+      "championshipId": "01HXYZ...",
+      "userId": "01HXYZ...",
+      "role": "ORGANIZER",
+      "createdAt": "2026-06-06T00:00:00.000Z",
+      "user": {
+        "id": "01HXYZ...",
+        "name": "Usuario",
+        "email": "usuario@email.com",
+        "avatarUrl": null
+      }
+    }
+  }
+}
+```
+
+### Permission
+
+* Authenticated user whose email matches the invitation email
+
+### Notes
+
+* The user must be logged in before accepting the invitation.
+* If the user does not have an account, they must register or log in first, then call this endpoint with the invitation token.
+* The invitation token is sent by email when a member is invited.
+
+---
+
 ## List Members
 
 ### GET
