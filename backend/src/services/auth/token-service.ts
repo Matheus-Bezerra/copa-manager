@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomInt } from 'node:crypto';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { env } from '../../config/env';
 
@@ -21,4 +21,15 @@ export function generateAccessToken(userId: string): string {
   return jwt.sign({ sub: userId }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRES_IN as SignOptions['expiresIn'],
   });
+}
+
+export function generatePasswordResetCode(): string {
+  return randomInt(100000, 1000000).toString();
+}
+
+export function getPasswordResetExpiresAt(): Date {
+  const expiresAt = new Date();
+  expiresAt.setMinutes(expiresAt.getMinutes() + env.PASSWORD_RESET_EXPIRES_MINUTES);
+
+  return expiresAt;
 }

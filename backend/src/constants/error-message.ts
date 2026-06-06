@@ -30,6 +30,31 @@ export const errorMessage = {
     message: 'Unauthorized',
     statusCode: 401,
   },
+  invalidCurrentPassword: {
+    code: 'AUTH/INVALID_CURRENT_PASSWORD',
+    message: 'Invalid current password',
+    statusCode: 401,
+  },
+  samePassword: {
+    code: 'AUTH/SAME_PASSWORD',
+    message: 'New password must be different from the current password',
+    statusCode: 400,
+  },
+  invalidResetCode: {
+    code: 'AUTH/INVALID_RESET_CODE',
+    message: 'Invalid or expired reset code',
+    statusCode: 400,
+  },
+  noLocalPassword: {
+    code: 'AUTH/NO_LOCAL_PASSWORD',
+    message: 'User has no local password',
+    statusCode: 400,
+  },
+  userNotFound: {
+    code: 'AUTH/USER_NOT_FOUND',
+    message: 'User not found',
+    statusCode: 404,
+  },
   validationFieldError: {
     code: 'VALIDATION/FIELD_ERROR',
     message: 'Validation error',

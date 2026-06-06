@@ -10,6 +10,7 @@ import {
   validatorCompiler,
 } from '@/config/swagger.config';
 import { authRoutes } from '@/http/routes/auth.routes';
+import { userRoutes } from '@/http/routes/user.routes';
 import { healthSchema } from '@/http/schemas/health.schema';
 
 export async function buildApp() {
@@ -33,6 +34,7 @@ export async function buildApp() {
       api.get('/health', { schema: healthSchema }, async () => ({ status: 'ok' }));
       
       await api.register(authRoutes);
+      await api.register(userRoutes);
     },
     { prefix: '/api/v1' }
   );

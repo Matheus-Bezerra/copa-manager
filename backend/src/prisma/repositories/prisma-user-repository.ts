@@ -27,4 +27,11 @@ export class PrismaUserRepository implements UserRepository {
   async create(data: CreateUserInput): Promise<User> {
     return prisma.user.create({ data });
   }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { passwordHash },
+    });
+  }
 }

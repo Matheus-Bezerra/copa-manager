@@ -1,8 +1,9 @@
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import 'fastify';
 
 declare module 'fastify' {
-  interface FastifyInstance {
-    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  interface FastifyRequest {
+    getAuthContext: () => Promise<{ userId: string }>;
+    verifyUserAvailability: () => Promise<{ userId: string }>;
   }
 }
 
@@ -12,3 +13,5 @@ declare module '@fastify/jwt' {
     user: { sub: string };
   }
 }
+
+export {};

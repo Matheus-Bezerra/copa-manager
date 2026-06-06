@@ -1,13 +1,7 @@
 import { z } from '@/lib/zod';
 import { expandErrorResponses } from '@/utils/errors/expand-error-responses';
 import { errorSchema } from '../common.schema';
-
-const publicUserSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.email(),
-  avatarUrl: z.string().nullable(),
-});
+import { publicUserSchema } from './user.schema';
 
 const loginResponseSchema = z.object({
   data: z.object({

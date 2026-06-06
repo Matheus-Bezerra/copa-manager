@@ -24,6 +24,7 @@ export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   findById(id: string): Promise<User | null>;
   create(data: CreateUserInput): Promise<User>;
+  updatePasswordHash(id: string, passwordHash: string): Promise<void>;
 }
 
 export interface PublicUser {

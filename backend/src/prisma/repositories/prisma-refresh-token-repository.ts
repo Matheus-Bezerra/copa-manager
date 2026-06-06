@@ -28,4 +28,12 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
   async delete(id: string): Promise<void> {
     await prisma.refreshToken.delete({ where: { id } });
   }
+
+  async deleteByTokenHash(tokenHash: string): Promise<void> {
+    await prisma.refreshToken.deleteMany({ where: { tokenHash } });
+  }
+
+  async deleteAllByUserId(userId: string): Promise<void> {
+    await prisma.refreshToken.deleteMany({ where: { userId } });
+  }
 }

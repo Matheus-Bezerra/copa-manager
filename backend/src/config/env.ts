@@ -7,6 +7,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1),
   JWT_EXPIRES_IN: z.string().default('15m'),
   REFRESH_TOKEN_EXPIRES_DAYS: z.coerce.number().default(7),
+  PASSWORD_RESET_EXPIRES_MINUTES: z.coerce.number().default(15),
+  RESEND_API_KEY: z.string().min(1),
+  RESEND_FROM: z.string().min(1).default('onboarding@resend.dev'),
   ENABLE_SWAGGER: z
     .enum(['true', 'false'])
     .default('true')
