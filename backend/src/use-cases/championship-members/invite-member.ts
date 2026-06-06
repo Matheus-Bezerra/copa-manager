@@ -1,12 +1,15 @@
 import type { ChampionshipRole } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { ulid } from 'ulidx';
+import { env } from '@/config/env';
 import { errorMessage } from '@/constants/error-message';
 import type { ChampionshipMemberRepository } from '@/repositories/championship-member-repository';
+import type { ChampionshipRepository } from '@/repositories/championship-repository';
 import { MANAGE_CHAMPIONSHIP_ROLES } from '@/repositories/championship-repository';
 import type { InvitationRepository } from '@/repositories/invitation-repository';
 import type { UserRepository } from '@/repositories/user-repository';
 import type { ChampionshipAccessService } from '@/services/championship/championship-authorization';
+import type { EmailService } from '@/services/email/email-service';
 
 const INVITATION_EXPIRATION_DAYS = 7;
 
@@ -20,9 +23,11 @@ export interface InviteMemberUseCaseRequest {
 export class InviteMemberUseCase {
   constructor(
     private readonly championshipService: ChampionshipAccessService,
+    private readonly championshipRepository: ChampionshipRepository,
     private readonly championshipMemberRepository: ChampionshipMemberRepository,
     private readonly invitationRepository: InvitationRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly emailService: EmailService
   ) {}
 
   async execute(request: InviteMemberUseCaseRequest) {
@@ -58,6 +63,12 @@ export class InviteMemberUseCase {
       throw errorMessage.championshipInvitationAlreadyPending;
     }
 
+    const championship = await this.championshipRepository.findById(request.championshipId);
+
+    if (!championship) {
+      throw errorMessage.championshipNotFound;
+    }
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + INVITATION_EXPIRATION_DAYS);
 
@@ -70,6 +81,21 @@ export class InviteMemberUseCase {
       expiresAt,
     });
 
-    return { invitation };
+    const inviteUrl = `${env.APP_URL}/invitations/accept?token=${invitation.token}`;
+
+    await this.emailService.sendInvitationEmail({
+      to: request.email,
+      championshipName: championship.name,
+      role: request.role,
+      inviteUrl,
+      expiresAt,
+    });
+
+    return {
+      invitation: {
+        ...invitation,
+        inviteUrl,
+      },
+    };
   }
 }

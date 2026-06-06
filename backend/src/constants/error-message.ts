@@ -95,6 +95,26 @@ export const errorMessage = {
     message: 'An invitation is already pending for this email',
     statusCode: 409,
   },
+  championshipInvitationNotFound: {
+    code: 'CHAMPIONSHIP/INVITATION_NOT_FOUND',
+    message: 'Invitation not found',
+    statusCode: 404,
+  },
+  championshipInvitationInvalid: {
+    code: 'CHAMPIONSHIP/INVITATION_INVALID',
+    message: 'Invitation is no longer valid',
+    statusCode: 422,
+  },
+  championshipInvitationExpired: {
+    code: 'CHAMPIONSHIP/INVITATION_EXPIRED',
+    message: 'Invitation has expired',
+    statusCode: 422,
+  },
+  championshipInvitationEmailMismatch: {
+    code: 'CHAMPIONSHIP/INVITATION_EMAIL_MISMATCH',
+    message: 'Invitation email does not match the authenticated user',
+    statusCode: 403,
+  },
   championshipMemberNotFound: {
     code: 'CHAMPIONSHIP/MEMBER_NOT_FOUND',
     message: 'Championship member not found',

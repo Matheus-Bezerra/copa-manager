@@ -26,4 +26,5 @@ export const invitationSchema = z.object({
   expiresAt: z.coerce.date(),
   acceptedAt: z.coerce.date().nullable(),
   createdAt: z.coerce.date(),
+  inviteUrl: z.url(),
 });

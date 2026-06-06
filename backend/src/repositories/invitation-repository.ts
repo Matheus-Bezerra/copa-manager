@@ -26,5 +26,8 @@ export interface InvitationRepository {
     championshipId: string,
     email: string
   ): Promise<Invitation | null>;
+  findByToken(token: string): Promise<Invitation | null>;
   create(data: CreateInvitationInput): Promise<Invitation>;
+  markAsExpired(id: string): Promise<Invitation>;
+  acceptInvitation(id: string): Promise<Invitation>;
 }

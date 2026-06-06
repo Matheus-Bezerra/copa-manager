@@ -1,9 +1,11 @@
 import type { FastifyInstance } from 'fastify';
+import { acceptInvitationController } from '@/http/controllers/championship-members/accept-invitation.controller';
 import { inviteMemberController } from '@/http/controllers/championship-members/invite-member.controller';
 import { listMembersController } from '@/http/controllers/championship-members/list-members.controller';
 import { removeMemberController } from '@/http/controllers/championship-members/remove-member.controller';
 import { updateMemberRoleController } from '@/http/controllers/championship-members/update-member-role.controller';
 import { auth } from '@/http/middlewares/auth.middleware';
+import { acceptInvitationSchema } from '@/http/schemas/championship-members/accept-invitation.schema';
 import { inviteMemberSchema } from '@/http/schemas/championship-members/invite-member.schema';
 import { listMembersSchema } from '@/http/schemas/championship-members/list-members.schema';
 import { removeMemberSchema } from '@/http/schemas/championship-members/remove-member.schema';
@@ -17,6 +19,7 @@ export async function championshipMemberRoutes(app: FastifyInstance) {
     { schema: inviteMemberSchema },
     inviteMemberController
   );
+  app.post('/invitations/accept', { schema: acceptInvitationSchema }, acceptInvitationController);
   app.get(
     '/championships/:championshipId/members',
     { schema: listMembersSchema },
