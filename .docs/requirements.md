@@ -105,13 +105,15 @@ Um usuário pode criar múltiplos campeonatos.
 
 Cada campeonato deve possuir:
 
-* Nome.
+* Nome (único na plataforma).
 * Descrição.
 * Regulamento.
 * Data de abertura.
 * Data de início.
 * Data de encerramento.
 * Status.
+
+O nome do campeonato deve ser único na plataforma. Nomes que geram o mesmo identificador público (`slug`) são tratados como duplicados.
 
 Status possíveis:
 

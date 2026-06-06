@@ -166,6 +166,8 @@ Representa campeonatos.
 ### Notes
 
 * Exclusão física (hard delete).
+* O slug é derivado do nome e deve ser único na plataforma.
+* Dois campeonatos não podem possuir o mesmo nome (nomes que geram o mesmo slug são considerados duplicados).
 
 ### Indexes
 
@@ -288,6 +290,7 @@ Critérios de desempate.
 * short_name
 * logo_url
 * primary_color
+* secondary_color
 * created_at
 * updated_at
 
