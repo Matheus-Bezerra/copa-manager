@@ -100,6 +100,11 @@ export const errorMessage = {
     message: 'Championship member not found',
     statusCode: 404,
   },
+  championshipNameAlreadyExists: {
+    code: 'CHAMPIONSHIP/NAME_ALREADY_EXISTS',
+    message: 'A championship with this name already exists',
+    statusCode: 409,
+  },
   teamNotFound: {
     code: 'TEAM/NOT_FOUND',
     message: 'Team not found',

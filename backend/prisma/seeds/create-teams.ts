@@ -13,12 +13,14 @@ export async function createTeams(championship: Championship): Promise<Team[]> {
           name: team.name,
           shortName: team.shortName,
           primaryColor: team.primaryColor,
+          secondaryColor: team.secondaryColor,
         },
         update: {
           championshipId: championship.id,
           name: team.name,
           shortName: team.shortName,
           primaryColor: team.primaryColor,
+          secondaryColor: team.secondaryColor,
         },
       })
     )

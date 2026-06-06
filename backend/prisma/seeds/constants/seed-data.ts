@@ -34,24 +34,28 @@ export const SEED_TEAMS = [
     name: 'Flamengo FC',
     shortName: 'FLA',
     primaryColor: '#E03A3E',
+    secondaryColor: '#000000',
   },
   {
     id: '01SEED00000000000000000021',
     name: 'Palmeiras FC',
     shortName: 'PAL',
     primaryColor: '#006437',
+    secondaryColor: '#FFFFFF',
   },
   {
     id: '01SEED00000000000000000022',
     name: 'Corinthians FC',
     shortName: 'COR',
     primaryColor: '#000000',
+    secondaryColor: '#FFFFFF',
   },
   {
     id: '01SEED00000000000000000023',
     name: 'São Paulo FC',
     shortName: 'SAO',
     primaryColor: '#EC1C24',
+    secondaryColor: '#FFFFFF',
   },
 ] as const;
 

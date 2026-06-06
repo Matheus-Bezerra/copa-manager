@@ -151,6 +151,7 @@ model Team {
   shortName      String?  @map("short_name")
   logoUrl        String?  @map("logo_url")
   primaryColor   String?  @map("primary_color")
+  secondaryColor String?  @map("secondary_color")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
