@@ -12,6 +12,25 @@ enum UserStatus {
   BLOCKED
 }
 
+enum ChampionshipStatus {
+  OPEN
+  IN_PROGRESS
+  FINISHED
+}
+
+enum ChampionshipRole {
+  OWNER
+  ADMINISTRATOR
+  ORGANIZER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 model User {
   id           String     @id
   name         String
@@ -24,8 +43,10 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
 
-  refreshTokens       RefreshToken[]
-  passwordResetTokens PasswordResetToken[]
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
+  ownedChampionships   Championship[]       @relation("ChampionshipOwner")
+  championshipMembers  ChampionshipMember[]
 
   @@index([email])
   @@index([googleId])
@@ -61,4 +82,117 @@ model PasswordResetToken {
   @@index([userId])
   @@index([code])
   @@map("password_reset_tokens")
+}
+
+model Championship {
+  id          String             @id
+  ownerUserId String             @map("owner_user_id")
+  name        String
+  slug        String             @unique
+  description String?
+  regulations String?
+  startDate   DateTime           @map("start_date") @db.Date
+  endDate     DateTime           @map("end_date") @db.Date
+  status      ChampionshipStatus @default(OPEN)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  owner       User                 @relation("ChampionshipOwner", fields: [ownerUserId], references: [id])
+  
+  members     ChampionshipMember[]
+  invitations Invitation[]
+  teams       Team[]
+
+  @@index([slug])
+  @@index([ownerUserId])
+  @@index([status])
+  @@map("championships")
+}
+
+model ChampionshipMember {
+  id             String           @id
+  championshipId String           @map("championship_id")
+  userId         String           @map("user_id")
+  role           ChampionshipRole
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([championshipId, userId])
+  @@index([championshipId])
+  @@index([userId])
+  @@map("championship_members")
+}
+
+model Invitation {
+  id             String           @id
+  championshipId String           @map("championship_id")
+  email          String
+  role           ChampionshipRole
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime         @map("expires_at")
+  acceptedAt     DateTime?        @map("accepted_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+
+  @@index([championshipId])
+  @@index([email])
+  @@index([token])
+  @@map("invitations")
+}
+
+model Team {
+  id             String   @id
+  championshipId String   @map("championship_id")
+  name           String
+  shortName      String?  @map("short_name")
+  logoUrl        String?  @map("logo_url")
+  primaryColor   String?  @map("primary_color")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  players      Player[]
+
+  @@index([championshipId])
+  @@index([name])
+  @@map("teams")
+}
+
+model Player {
+  id          String   @id
+  teamId      String   @map("team_id")
+  name        String
+  shirtNumber Int?     @map("shirt_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  team       Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  statistics PlayerStatistics?
+
+  @@index([teamId])
+  @@index([name])
+  @@map("players")
+}
+
+model PlayerStatistics {
+  id            String   @id
+  playerId      String   @unique @map("player_id")
+  matchesPlayed Int      @default(0) @map("matches_played")
+  goals         Int      @default(0)
+  assists       Int      @default(0)
+  yellowCards   Int      @default(0) @map("yellow_cards")
+  redCards      Int      @default(0) @map("red_cards")
+  matchMvps     Int      @default(0) @map("match_mvps")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([goals])
+  @@index([matchMvps])
+  @@map("player_statistics")
 }

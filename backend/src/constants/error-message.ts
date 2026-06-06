@@ -70,4 +70,49 @@ export const errorMessage = {
     message: 'Internal server error',
     statusCode: 500,
   },
+  championshipNotFound: {
+    code: 'CHAMPIONSHIP/NOT_FOUND',
+    message: 'Championship not found',
+    statusCode: 404,
+  },
+  championshipForbidden: {
+    code: 'CHAMPIONSHIP/FORBIDDEN',
+    message: 'You do not have permission to perform this action',
+    statusCode: 403,
+  },
+  championshipMemberAlreadyExists: {
+    code: 'CHAMPIONSHIP/MEMBER_ALREADY_EXISTS',
+    message: 'User is already a member of this championship',
+    statusCode: 409,
+  },
+  championshipCannotModifyOwner: {
+    code: 'CHAMPIONSHIP/CANNOT_MODIFY_OWNER',
+    message: 'Cannot modify the owner member',
+    statusCode: 400,
+  },
+  championshipInvitationAlreadyPending: {
+    code: 'CHAMPIONSHIP/INVITATION_ALREADY_PENDING',
+    message: 'An invitation is already pending for this email',
+    statusCode: 409,
+  },
+  championshipMemberNotFound: {
+    code: 'CHAMPIONSHIP/MEMBER_NOT_FOUND',
+    message: 'Championship member not found',
+    statusCode: 404,
+  },
+  teamNotFound: {
+    code: 'TEAM/NOT_FOUND',
+    message: 'Team not found',
+    statusCode: 404,
+  },
+  teamNameAlreadyTaken: {
+    code: 'TEAM/NAME_ALREADY_TAKEN',
+    message: 'A team with this name already exists in the championship',
+    statusCode: 409,
+  },
+  playerNotFound: {
+    code: 'PLAYER/NOT_FOUND',
+    message: 'Player not found',
+    statusCode: 404,
+  },
 } as const satisfies Record<string, AppError>;
