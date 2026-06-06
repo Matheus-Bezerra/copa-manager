@@ -10,6 +10,11 @@ import {
   validatorCompiler,
 } from '@/config/swagger.config';
 import { authRoutes } from '@/http/routes/auth.routes';
+import { championshipMemberRoutes } from '@/http/routes/championship-member.routes';
+import { championshipRoutes } from '@/http/routes/championship.routes';
+import { playerRoutes } from '@/http/routes/player.routes';
+import { publicRoutes } from '@/http/routes/public.routes';
+import { teamRoutes } from '@/http/routes/team.routes';
 import { userRoutes } from '@/http/routes/user.routes';
 import { healthSchema } from '@/http/schemas/health.schema';
 
@@ -35,6 +40,11 @@ export async function buildApp() {
       
       await api.register(authRoutes);
       await api.register(userRoutes);
+      await api.register(championshipRoutes);
+      await api.register(championshipMemberRoutes);
+      await api.register(teamRoutes);
+      await api.register(playerRoutes);
+      await api.register(publicRoutes);
     },
     { prefix: '/api/v1' }
   );
