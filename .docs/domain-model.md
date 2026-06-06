@@ -223,13 +223,20 @@ Representa os indicadores estatísticos de um jogador dentro de um campeonato.
 
 Representa uma fase do campeonato.
 
-### Exemplos
+### Tipos
 
-* Grupo
-* Turno Único
-* Turno e Returno
-* Semifinal
-* Final
+* **GroupStage** — fase com classificação em tabela.
+* **Knockout** — fase eliminatória.
+
+### Exemplos de name (rótulo livre)
+
+* "Grupos"
+* "Pontos Corridos"
+* "Turno e Returno"
+* "Oitavas de Final"
+* "16 avos de Final"
+* "Semifinal"
+* "Final"
 
 ### Atributos
 
@@ -237,11 +244,62 @@ Representa uma fase do campeonato.
 * name
 * type
 * order
+* format (apenas GroupStage)
+* qualifiedTeams (apenas Knockout)
+* thirdPlaceMatch (apenas Knockout)
 
 ### Regras
 
 * Pertence a um campeonato.
+* Possui uma ou mais rodadas.
+* Se do tipo GroupStage, possui ao menos um grupo e deve informar `format`.
+* Se do tipo Knockout, não possui grupos nem classificação; deve informar `qualifiedTeams`.
+* A ordem (`order`) pode ser informada pelo cliente no setup em lote ou atribuída automaticamente na criação individual.
+* A geração automática de rodadas ocorre via setup em lote; após o setup, rodadas podem ser ajustadas manualmente.
+
+---
+
+## Group
+
+Representa uma subdivisão dentro de uma fase do tipo GroupStage.
+
+### Exemplos
+
+* "Grupo A"
+* "Grupo B"
+* "Geral" (grupo único em formato de tabela simples)
+
+### Atributos
+
+* id
+* name
+* order
+
+### Regras
+
+* Pertence a um Stage do tipo GroupStage.
+* Possui classificação (Standings).
+* Partidas de fase de grupos referenciam o grupo.
+* A ordem (`order`) é atribuída automaticamente na criação individual; no setup em lote, segue a posição no array enviado.
+
+---
+
+## Round
+
+Representa uma rodada dentro de uma fase.
+
+### Atributos
+
+* id
+* number
+* name (opcional)
+
+### Regras
+
+* Pertence a um Stage.
 * Possui uma ou mais partidas.
+* O `number` define a ordem da rodada dentro da fase.
+* O `number` é atribuído automaticamente na criação individual; no setup em lote, é gerado automaticamente com base no formato ou em `qualifiedTeams`.
 
 ---
 
@@ -264,7 +322,8 @@ Representa uma partida.
 ### Regras
 
 * Possui dois times participantes.
-* Pertence a uma fase.
+* Pertence a uma rodada.
+* Em fases GroupStage, pertence também a um grupo.
 * Pode gerar eventos.
 
 ---
@@ -311,11 +370,11 @@ Representa um evento ocorrido durante uma partida.
 
 ## Standing
 
-Representa a classificação de uma equipe.
+Representa a classificação de uma equipe dentro de um grupo de uma fase.
 
 ### Responsabilidades
 
-* Consolidar desempenho do time.
+* Consolidar desempenho do time no escopo do grupo.
 
 ### Atributos
 
@@ -329,8 +388,9 @@ Representa a classificação de uma equipe.
 
 ### Regras
 
-* Sempre derivado dos resultados das partidas.
+* Sempre derivado dos resultados das partidas do grupo na fase.
 * Nunca deve ser editado manualmente.
+* Existe apenas em fases do tipo GroupStage.
 
 ---
 
@@ -410,6 +470,8 @@ Entidades internas:
 * ChampionshipMember
 * Invitation
 * Stage
+* Group
+* Round
 * ChampionshipRules
 
 Responsabilidade:
@@ -514,11 +576,14 @@ Garantir consistência dos eventos e resultados da partida.
 ## StageType
 
 * GroupStage
+* Knockout
+
+---
+
+## StageFormat
+
 * RoundRobin
 * DoubleRoundRobin
-* SemiFinal
-* Final
-* Knockout
 
 ---
 

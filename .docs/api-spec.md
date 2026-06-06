@@ -618,6 +618,161 @@ Não concede acesso direto aos recursos da API.
 /championships/{championshipId}/stages
 ```
 
+### Request
+
+```json
+{
+  "name": "Pontos Corridos",
+  "type": "GROUP_STAGE",
+  "format": "ROUND_ROBIN"
+}
+```
+
+Para fase `KNOCKOUT`:
+
+```json
+{
+  "name": "Mata-Mata",
+  "type": "KNOCKOUT",
+  "qualifiedTeams": 8,
+  "thirdPlaceMatch": false
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "",
+    "name": "Pontos Corridos",
+    "type": "GROUP_STAGE",
+    "format": "ROUND_ROBIN",
+    "qualifiedTeams": null,
+    "thirdPlaceMatch": false,
+    "displayOrder": 1,
+    "createdAt": "2026-06-17T19:00:00Z"
+  }
+}
+```
+
+### Notes
+
+* `type` aceita `GROUP_STAGE` ou `KNOCKOUT`.
+* O `name` é livre (ex.: "Oitavas de Final", "Grupos", "Turno e Returno").
+* `format` é obrigatório quando `type` é `GROUP_STAGE`; aceita `ROUND_ROBIN` ou `DOUBLE_ROUND_ROBIN`.
+* `qualifiedTeams` é obrigatório quando `type` é `KNOCKOUT`; deve ser potência de 2.
+* `thirdPlaceMatch` aplica-se apenas a `KNOCKOUT`; default `false`.
+* `displayOrder` é atribuído automaticamente pelo backend na criação individual; o cliente não envia esse campo.
+* Este endpoint **não** gera rodadas automaticamente; use o setup em lote para isso.
+
+---
+
+## Setup Stages (Bulk)
+
+Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
+
+### POST
+
+```http
+/championships/{championshipId}/stages/setup
+```
+
+### Request
+
+```json
+{
+  "stages": [
+    {
+      "name": "Fase de Grupos",
+      "type": "GROUP_STAGE",
+      "order": 1,
+      "format": "ROUND_ROBIN",
+      "groups": [
+        { "name": "Grupo A", "teams": 4 },
+        { "name": "Grupo B", "teams": 4 }
+      ]
+    },
+    {
+      "name": "Mata-Mata",
+      "type": "KNOCKOUT",
+      "order": 2,
+      "qualifiedTeams": 4,
+      "thirdPlaceMatch": true
+    }
+  ]
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "stages": [
+      {
+        "id": "",
+        "name": "Fase de Grupos",
+        "type": "GROUP_STAGE",
+        "format": "ROUND_ROBIN",
+        "qualifiedTeams": null,
+        "thirdPlaceMatch": false,
+        "displayOrder": 1,
+        "groups": [
+          {
+            "id": "",
+            "name": "Grupo A",
+            "displayOrder": 1
+          },
+          {
+            "id": "",
+            "name": "Grupo B",
+            "displayOrder": 2
+          }
+        ],
+        "rounds": [
+          { "id": "", "number": 1, "name": "Rodada 1" },
+          { "id": "", "number": 2, "name": "Rodada 2" },
+          { "id": "", "number": 3, "name": "Rodada 3" },
+          { "id": "", "number": 4, "name": "Rodada 4" },
+          { "id": "", "number": 5, "name": "Rodada 5" },
+          { "id": "", "number": 6, "name": "Rodada 6" }
+        ],
+        "createdAt": "2026-06-17T19:00:00Z"
+      },
+      {
+        "id": "",
+        "name": "Mata-Mata",
+        "type": "KNOCKOUT",
+        "format": null,
+        "qualifiedTeams": 4,
+        "thirdPlaceMatch": true,
+        "displayOrder": 2,
+        "groups": [],
+        "rounds": [
+          { "id": "", "number": 1, "name": "Semifinal" },
+          { "id": "", "number": 2, "name": "Final" },
+          { "id": "", "number": 3, "name": "3º Lugar" }
+        ],
+        "createdAt": "2026-06-17T19:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Notes
+
+* `order` é informado pelo cliente para cada fase.
+* `groups.teams` define a quantidade de times por grupo; usado para calcular rodadas em `GROUP_STAGE`. Não é persistido — serve apenas para geração.
+* A ordem dos grupos segue a posição no array (`displayOrder` 1, 2, 3...).
+* **GROUP_STAGE**: rodadas geradas com base em `format` e no maior `teams` entre os grupos.
+  * `ROUND_ROBIN` → `(N × (N - 1)) / 2` rodadas, nomeadas "Rodada 1", "Rodada 2", etc.
+  * `DOUBLE_ROUND_ROBIN` → `N × (N - 1)` rodadas.
+* **KNOCKOUT**: rodadas geradas com base em `qualifiedTeams` e auto-nomeadas (ex.: "Semifinal", "Final"). Se `thirdPlaceMatch: true`, adiciona rodada "3º Lugar" em paralelo à "Final".
+* Rodadas podem ser ajustadas manualmente após o setup via endpoints individuais.
+* Complementa os endpoints individuais de criação de fase, grupo e rodada.
+
 ---
 
 ## List Stages
@@ -627,6 +782,168 @@ Não concede acesso direto aos recursos da API.
 ```http
 /championships/{championshipId}/stages
 ```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "",
+      "name": "Pontos Corridos",
+      "type": "GROUP_STAGE",
+      "format": "ROUND_ROBIN",
+      "qualifiedTeams": null,
+      "thirdPlaceMatch": false,
+      "displayOrder": 1,
+      "createdAt": "2026-06-17T19:00:00Z"
+    }
+  ]
+}
+```
+
+### Notes
+
+* Resultados ordenados por `displayOrder` ascendente.
+
+---
+
+# Groups
+
+## Create Group
+
+### POST
+
+```http
+/championships/{championshipId}/stages/{stageId}/groups
+```
+
+### Request
+
+```json
+{
+  "name": "Grupo A"
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "",
+    "stageId": "",
+    "name": "Grupo A",
+    "displayOrder": 1,
+    "createdAt": "2026-06-17T19:00:00Z"
+  }
+}
+```
+
+### Notes
+
+* A fase deve ser do tipo `GROUP_STAGE`.
+* Toda fase `GROUP_STAGE` deve possuir ao menos um grupo.
+* `displayOrder` é atribuído automaticamente pelo backend (próximo valor sequencial na fase) e retornado na resposta; o cliente não envia esse campo.
+
+---
+
+## List Groups
+
+### GET
+
+```http
+/championships/{championshipId}/stages/{stageId}/groups
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "",
+      "stageId": "",
+      "name": "Grupo A",
+      "displayOrder": 1,
+      "createdAt": "2026-06-17T19:00:00Z"
+    }
+  ]
+}
+```
+
+### Notes
+
+* Resultados ordenados por `displayOrder` ascendente.
+
+---
+
+# Rounds
+
+## Create Round
+
+### POST
+
+```http
+/championships/{championshipId}/stages/{stageId}/rounds
+```
+
+### Request
+
+```json
+{
+  "name": "Rodada 1"
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "",
+    "stageId": "",
+    "number": 1,
+    "name": "Rodada 1",
+    "createdAt": "2026-06-17T19:00:00Z"
+  }
+}
+```
+
+### Notes
+
+* `name` é opcional.
+* `number` é atribuído automaticamente pelo backend (próximo valor sequencial na fase) e retornado na resposta; o cliente não envia esse campo.
+
+---
+
+## List Rounds
+
+### GET
+
+```http
+/championships/{championshipId}/stages/{stageId}/rounds
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "",
+      "stageId": "",
+      "number": 1,
+      "name": "Rodada 1",
+      "createdAt": "2026-06-17T19:00:00Z"
+    }
+  ]
+}
+```
+
+### Notes
+
+* Resultados ordenados por `number` ascendente.
 
 ---
 
@@ -644,12 +961,18 @@ Não concede acesso direto aos recursos da API.
 
 ```json
 {
-  "stageId": "",
+  "roundId": "",
+  "groupId": "",
   "homeTeamId": "",
   "awayTeamId": "",
   "scheduledAt": "2026-06-17T19:00:00Z"
 }
 ```
+
+### Notes
+
+* `groupId` é obrigatório quando a fase da rodada é `GROUP_STAGE`; omitido ou nulo em fases `KNOCKOUT`.
+* O `stageId` é derivado da rodada informada.
 
 ---
 
@@ -788,7 +1111,32 @@ Não concede acesso direto aos recursos da API.
 ### GET
 
 ```http
-/championships/{championshipId}/standings
+/championships/{championshipId}/standings?stageId={stageId}&groupId={groupId}
+```
+
+### Query Parameters
+
+* `stageId` (obrigatório) — fase da classificação.
+* `groupId` (obrigatório) — grupo dentro da fase.
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "teamId": "",
+      "position": 1,
+      "points": 9,
+      "wins": 3,
+      "draws": 0,
+      "losses": 0,
+      "goalsScored": 8,
+      "goalsConceded": 2,
+      "goalDifference": 6
+    }
+  ]
+}
 ```
 
 ---
@@ -843,8 +1191,13 @@ Endpoints disponíveis sem autenticação.
 ### GET
 
 ```http
-/public/championships/{slug}/standings
+/public/championships/{slug}/standings?stageId={stageId}&groupId={groupId}
 ```
+
+### Query Parameters
+
+* `stageId` (obrigatório) — fase da classificação.
+* `groupId` (obrigatório) — grupo dentro da fase.
 
 ---
 
@@ -873,6 +1226,7 @@ Endpoints disponíveis sem autenticação.
 | Recurso               | Owner | Administrator | Organizer | Spectator |
 | --------------------- | ----- | ------------- | --------- | --------- |
 | Gerenciar campeonato  | ✅     | ✅             | ❌         | ❌         |
+| Gerenciar fases       | ✅     | ✅             | ❌         | ❌         |
 | Gerenciar membros     | ✅     | ✅             | ❌         | ❌         |
 | Criar equipes         | ✅     | ✅             | ✅         | ❌         |
 | Criar jogadores       | ✅     | ✅             | ✅         | ❌         |

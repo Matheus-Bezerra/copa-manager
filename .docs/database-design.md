@@ -369,6 +369,9 @@ Fases do campeonato.
 * championship_id
 * name
 * type
+* format
+* qualified_teams
+* third_place_match
 * display_order
 * created_at
 
@@ -376,6 +379,63 @@ Fases do campeonato.
 
 * championship_id
 * display_order
+
+### Notes
+
+* `format` é obrigatório quando `type` é `GROUP_STAGE`; nulo em `KNOCKOUT`.
+* `qualified_teams` é obrigatório quando `type` é `KNOCKOUT`; nulo em `GROUP_STAGE`.
+* `third_place_match` aplica-se apenas a `KNOCKOUT`; default `false`.
+* `display_order`: no setup em lote, informado pelo cliente; na criação individual, atribuído automaticamente pelo backend.
+
+---
+
+## Groups
+
+Grupos dentro de uma fase do tipo GROUP_STAGE.
+
+### Columns
+
+* id
+* stage_id
+* name
+* display_order
+* created_at
+
+### Indexes
+
+* stage_id
+* display_order
+
+### Notes
+
+* `display_order` é atribuído pelo backend na criação (próximo valor sequencial na fase).
+
+---
+
+## Rounds
+
+Rodadas dentro de uma fase.
+
+### Columns
+
+* id
+* stage_id
+* number
+* name
+* created_at
+
+### Constraints
+
+* unique(stage_id, number)
+
+### Indexes
+
+* stage_id
+
+### Notes
+
+* `number` é atribuído automaticamente na criação individual (próximo valor sequencial na fase).
+* No setup em lote, rodadas são geradas automaticamente com base em `format` (`GROUP_STAGE`) ou `qualifiedTeams` (`KNOCKOUT`).
 
 ---
 
@@ -387,7 +447,8 @@ Partidas.
 
 * id
 * championship_id
-* stage_id
+* round_id
+* group_id
 * home_team_id
 * away_team_id
 * scheduled_at
@@ -395,10 +456,16 @@ Partidas.
 * created_at
 * updated_at
 
+### Notes
+
+* group_id é obrigatório quando a fase da rodada é GROUP_STAGE; nulo em fases KNOCKOUT.
+* O stage é derivado via round.stage_id.
+
 ### Indexes
 
 * championship_id
-* stage_id
+* round_id
+* group_id
 * scheduled_at
 
 ---
@@ -457,12 +524,14 @@ Eventos registrados na partida.
 
 ## Standings
 
-Classificação geral.
+Classificação por grupo dentro de uma fase.
 
 ### Columns
 
 * id
 * championship_id
+* stage_id
+* group_id
 * team_id
 * position
 * points
@@ -476,11 +545,17 @@ Classificação geral.
 
 ### Constraints
 
-* unique(championship_id, team_id)
+* unique(stage_id, group_id, team_id)
+
+### Notes
+
+* championship_id mantido como denormalização para consultas globais e endpoints públicos.
 
 ### Indexes
 
 * championship_id
+* stage_id
+* group_id
 * position
 
 ---
@@ -542,11 +617,14 @@ Premiações concedidas.
 ## stage_type
 
 * GROUP_STAGE
+* KNOCKOUT
+
+---
+
+## stage_format
+
 * ROUND_ROBIN
 * DOUBLE_ROUND_ROBIN
-* SEMI_FINAL
-* FINAL
-* KNOCKOUT
 
 ---
 
@@ -593,6 +671,8 @@ Championship
  ├─ Invitations
  ├─ Teams
  ├─ Stages
+ │   ├─ Groups
+ │   └─ Rounds
  ├─ Matches
  ├─ Standings
  └─ Awards
@@ -609,4 +689,11 @@ Player
 Match
  ├─ MatchResult
  └─ MatchEvents
+
+Round
+ └─ Match
+
+Group
+ ├─ Standing
+ └─ Match
 ```

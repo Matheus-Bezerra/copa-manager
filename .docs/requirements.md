@@ -232,18 +232,125 @@ As regras devem ser configuráveis sem necessidade de alteração de código.
 
 # Fases
 
-O sistema deve suportar múltiplos tipos de fase.
+O sistema deve suportar fases de campeonato organizadas em sequência.
 
-Exemplos:
+Cada fase possui um **tipo** que define o comportamento e a visualização:
 
-* Fase de grupos.
-* Turno único.
-* Turno e returno.
-* Semifinal.
-* Final.
-* Mata-mata.
+* **GROUP_STAGE** — fase com classificação em tabela (grupos, pontos corridos, turno único, turno e returno).
+* **KNOCKOUT** — fase eliminatória (mata-mata, oitavas, 16 avos, 32 avos, quartas, semifinal, final).
 
-As fases devem poder ser organizadas em sequência.
+O **nome** da fase é definido livremente pelo organizador e serve como rótulo de exibição. Exemplos de nome (não de tipo):
+
+* "Grupos"
+* "Pontos Corridos"
+* "Turno e Returno"
+* "Oitavas de Final"
+* "16 avos de Final"
+* "Semifinal"
+* "Final"
+
+Formatos específicos como turno único, turno e returno ou oitavas **não** são tipos distintos — o **formato** da fase (`ROUND_ROBIN`, `DOUBLE_ROUND_ROBIN`) e o **nome** livre definem o comportamento e o rótulo de exibição.
+
+## Sequência
+
+As fases devem poder ser organizadas em sequência via ordem de exibição.
+
+* Na **criação individual** de fase, a ordem é **atribuída automaticamente pelo backend** (próximo valor sequencial no campeonato).
+* No **setup em lote**, o organizador informa `order` explicitamente para cada fase.
+
+Exemplo: Grupos → Oitavas → Quartas → Semifinal → Final.
+
+## Formato (GROUP_STAGE)
+
+Fases do tipo `GROUP_STAGE` devem informar um **formato** que define como as rodadas são geradas:
+
+* **ROUND_ROBIN** — turno único: cada time joga uma vez contra cada adversário do grupo.
+* **DOUBLE_ROUND_ROBIN** — turno e returno: cada confronto acontece duas vezes (ida e volta).
+
+A geração automática de rodadas usa o maior número de times informado entre os grupos da fase:
+
+* `ROUND_ROBIN` com N times → `(N × (N - 1)) / 2` rodadas.
+* `DOUBLE_ROUND_ROBIN` com N times → `N × (N - 1)` rodadas.
+
+## Mata-Mata (KNOCKOUT)
+
+Fases do tipo `KNOCKOUT` devem informar:
+
+* **qualifiedTeams** — quantidade de times classificados para a fase (deve ser potência de 2: 2, 4, 8, 16, 32...).
+* **thirdPlaceMatch** — se `true`, gera rodada extra de disputa de 3º lugar em paralelo à final.
+
+O backend gera automaticamente as rodadas com base em `qualifiedTeams` e auto-nomeia cada rodada:
+
+| qualifiedTeams | Rodadas geradas (ordem) |
+| --- | --- |
+| 32 | 16 Avos, Oitavas, Quartas, Semifinal, Final |
+| 16 | Oitavas, Quartas, Semifinal, Final |
+| 8 | Quartas, Semifinal, Final |
+| 4 | Semifinal, Final |
+| 2 | Final |
+
+Se `thirdPlaceMatch` for `true`, uma rodada adicional **3º Lugar** é criada em paralelo à rodada **Final**.
+
+## Grupos
+
+Toda fase do tipo `GROUP_STAGE` deve possuir um ou mais grupos.
+
+* Um campeonato com tabela única pode ter um único grupo (ex.: "Geral").
+* Campeonatos com fase de grupos podem ter múltiplos grupos (ex.: "Grupo A", "Grupo B", "Grupo C").
+* A classificação é calculada separadamente por grupo.
+* Na **criação individual** de grupo, a ordem é **atribuída automaticamente pelo backend** (próximo valor sequencial na fase).
+* No **setup em lote**, a ordem dos grupos segue a posição no array enviado.
+
+## Rodadas
+
+As partidas devem ser organizadas em **rodadas** dentro de cada fase.
+
+* Toda partida pertence a exatamente uma rodada (último nível da hierarquia antes da partida).
+* No **setup em lote**, o backend gera rodadas automaticamente com base no formato (`GROUP_STAGE`) ou em `qualifiedTeams` (`KNOCKOUT`).
+* Na **criação individual** de rodada, o `number` é **atribuído automaticamente pelo backend** (próximo valor sequencial na fase).
+* O nome da rodada é opcional na criação individual; no setup em lote, o backend define nomes padrão (ex.: "Rodada 1", "Oitavas", "Final").
+* Após o setup, rodadas podem ser criadas, editadas ou removidas manualmente.
+
+## Setup em Lote
+
+O sistema deve permitir criar toda a estrutura de fases de uma vez via endpoint dedicado.
+
+O payload define fases, grupos (quando aplicável) e metadados para geração de rodadas. O backend persiste stages, groups e rounds em uma única operação.
+
+Exemplo:
+
+```json
+{
+  "stages": [
+    {
+      "name": "Fase de Grupos",
+      "type": "GROUP_STAGE",
+      "order": 1,
+      "format": "ROUND_ROBIN",
+      "groups": [
+        { "name": "Grupo A", "teams": 4 },
+        { "name": "Grupo B", "teams": 4 }
+      ]
+    },
+    {
+      "name": "Mata-Mata",
+      "type": "KNOCKOUT",
+      "order": 2,
+      "qualifiedTeams": 4,
+      "thirdPlaceMatch": true
+    }
+  ]
+}
+```
+
+Os endpoints individuais de criação de fase, grupo e rodada **complementam** o setup em lote para ajustes posteriores.
+
+## Visualização
+
+O tipo da fase determina a visualização principal no frontend:
+
+* **GROUP_STAGE**: tabela de classificação por grupo e listagem ou agenda de partidas por rodada.
+* **KNOCKOUT**: visualização em mapa ou chave, conectando fases eliminatórias em sequência. Cada fase `KNOCKOUT` usa seu `name` como rótulo no mapa (oitavas, 16 avos, etc.), sem necessidade de tipos adicionais.
 
 ---
 
