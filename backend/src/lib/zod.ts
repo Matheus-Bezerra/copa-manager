@@ -18,6 +18,11 @@ config({
           return `Deve conter no mínimo ${issue.minimum} caractere(s)`;
         }
         break;
+      case 'too_big':
+        if (issue.origin === 'string') {
+          return `Deve conter no máximo ${issue.maximum} caractere(s)`;
+        }
+        break;
     }
 
     return undefined;

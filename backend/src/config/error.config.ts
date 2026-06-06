@@ -1,17 +1,15 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
-import { ZodError } from 'zod';
 import { errorMessage } from '@/constants/error-message';
 import { formatError, toErrorResponse } from '@/utils/errors/format-error';
+import { formatValidationErrorMessage } from '@/utils/errors/format-validation-errors';
 import { logger } from '@/utils/logger';
 
 export function errorHandler(error: FastifyError, _request: FastifyRequest, reply: FastifyReply) {
   if (error.validation) {
-    const zodError = error.cause instanceof ZodError ? error.cause : null;
-
     return reply.status(errorMessage.validationFieldError.statusCode).send(
       toErrorResponse({
         ...errorMessage.validationFieldError,
-        message: zodError?.issues[0]?.message ?? errorMessage.validationFieldError.message,
+        message: formatValidationErrorMessage(error),
       })
     );
   }
