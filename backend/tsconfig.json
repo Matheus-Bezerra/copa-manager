@@ -23,6 +23,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "prisma/seeds/**/*"],
   "exclude": ["node_modules", "build"]
 }
