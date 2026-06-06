@@ -201,6 +201,10 @@ Não concede acesso direto aos recursos da API.
 }
 ```
 
+### Response
+
+`204 No Content`
+
 ---
 
 ## Forgot Password
@@ -218,6 +222,10 @@ Não concede acesso direto aos recursos da API.
   "email": "matheus@email.com"
 }
 ```
+
+### Response
+
+`204 No Content`
 
 ---
 
@@ -237,6 +245,37 @@ Não concede acesso direto aos recursos da API.
   "newPassword": ""
 }
 ```
+
+### Response
+
+`204 No Content`
+
+---
+
+## Change Password
+
+### POST
+
+```http
+/auth/change-password
+```
+
+### Permission
+
+* Authenticated User
+
+### Request
+
+```json
+{
+  "currentPassword": "",
+  "newPassword": ""
+}
+```
+
+### Response
+
+`204 No Content`
 
 ---
 

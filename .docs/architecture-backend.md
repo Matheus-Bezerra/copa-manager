@@ -210,7 +210,7 @@ export async function getChampionshipController(
 **Convenções:**
 
 - Use `FastifyRequest` e `FastifyReply` sem generics; faça cast de `body`, `params` ou `query` com os tipos exportados do schema.
-- Rotas autenticadas usam `onRequest: [app.authenticate]` ou middleware equivalente.
+- Rotas autenticadas chamam `request.verifyUserAvailability()` (ou `getAuthContext()`) no controller.
 - Sempre envolva a lógica em `try/catch` com `formatError()`.
 - Status HTTP coerente: `201` para criação, `200` para leitura/atualização, `204` quando não há body.
 
@@ -224,11 +224,7 @@ import { getChampionshipController } from '@/http/controllers/championships/get-
 import { getChampionshipSchema } from '@/http/schemas/championships/get-championship.schema'
 
 export async function championshipRoutes(app: FastifyInstance) {
-  app.get(
-    '/championships/:championshipId',
-    { schema: getChampionshipSchema, onRequest: [app.authenticate] },
-    getChampionshipController,
-  )
+  app.get('/championships/:championshipId', { schema: getChampionshipSchema }, getChampionshipController)
 }
 ```
 
@@ -280,11 +276,24 @@ O sistema utiliza:
 - Login local (email + senha com bcrypt)
 - Login Google OAuth (futuro)
 
-O decorator `authenticate` (`src/config/jwt.config.ts`) valida o JWT nas rotas protegidas:
+O plugin `authMiddleware` (`src/http/middlewares/auth.middleware.ts`) expõe helpers no `request` para validação sob demanda no controller:
+
+| Método | Uso |
+|--------|-----|
+| `getAuthContext()` | Apenas JWT válido → `{ userId }` |
+| `verifyUserAvailability()` | JWT + usuário existente e `ACTIVE` no banco → `{ userId }` |
 
 ```ts
-app.get('/me', { onRequest: [app.authenticate], schema: getProfileSchema }, getProfileController)
+// Controller de rota autenticada
+const { userId } = await request.verifyUserAvailability()
+
+const useCase = new GetCurrentUserUseCase(new PrismaUserRepository())
+const user = await useCase.execute({ userId })
+
+return reply.status(200).send({ data: user })
 ```
+
+Rotas protegidas **não** usam `onRequest`; o controller decide o nível de verificação. Schemas Swagger usam `security: [{ bearerAuth: [] }]`.
 
 ---
 
@@ -402,7 +411,8 @@ npm run db:studio    # Interface visual do banco
 | Error handler global | `src/config/error.config.ts` |
 | Logger | `src/utils/logger.ts` |
 | Prisma client | `src/lib/prisma.ts` |
-| JWT / authenticate | `src/config/jwt.config.ts` |
+| JWT | `src/config/jwt.config.ts` |
+| Auth middleware | `src/http/middlewares/auth.middleware.ts` |
 
 ---
 
