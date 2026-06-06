@@ -22,7 +22,7 @@ export const invitationSchema = z.object({
   email: z.string(),
   role: championshipRoleSchema,
   token: z.string(),
-  status: z.enum(['PENDING', 'ACCEPTED', 'EXPIRED', 'REVOKED']),
+  status: z.enum(['PENDING', 'ACCEPTED', 'EXPIRED']),
   expiresAt: z.coerce.date(),
   acceptedAt: z.coerce.date().nullable(),
   createdAt: z.coerce.date(),
