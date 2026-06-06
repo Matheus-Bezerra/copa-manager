@@ -624,7 +624,8 @@ Não concede acesso direto aos recursos da API.
 {
   "name": "Pontos Corridos",
   "type": "GROUP_STAGE",
-  "format": "ROUND_ROBIN"
+  "format": "ROUND_ROBIN",
+  "teamsToAdvance": 2
 }
 ```
 
@@ -648,6 +649,7 @@ Para fase `KNOCKOUT`:
     "name": "Pontos Corridos",
     "type": "GROUP_STAGE",
     "format": "ROUND_ROBIN",
+    "teamsToAdvance": 2,
     "qualifiedTeams": null,
     "thirdPlaceMatch": false,
     "displayOrder": 1,
@@ -661,6 +663,7 @@ Para fase `KNOCKOUT`:
 * `type` aceita `GROUP_STAGE` ou `KNOCKOUT`.
 * O `name` é livre (ex.: "Oitavas de Final", "Grupos", "Turno e Returno").
 * `format` é obrigatório quando `type` é `GROUP_STAGE`; aceita `ROUND_ROBIN` ou `DOUBLE_ROUND_ROBIN`.
+* `teamsToAdvance` aplica-se a `GROUP_STAGE` (default `1`); ignorado em `KNOCKOUT`.
 * `qualifiedTeams` é obrigatório quando `type` é `KNOCKOUT`; deve ser potência de 2.
 * `thirdPlaceMatch` aplica-se apenas a `KNOCKOUT`; default `false`.
 * `displayOrder` é atribuído automaticamente pelo backend na criação individual; o cliente não envia esse campo.
@@ -688,6 +691,7 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
       "type": "GROUP_STAGE",
       "order": 1,
       "format": "ROUND_ROBIN",
+      "teamsToAdvance": 2,
       "groups": [
         { "name": "Grupo A", "teams": 4 },
         { "name": "Grupo B", "teams": 4 }
@@ -715,6 +719,7 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
         "name": "Fase de Grupos",
         "type": "GROUP_STAGE",
         "format": "ROUND_ROBIN",
+        "teamsToAdvance": 2,
         "qualifiedTeams": null,
         "thirdPlaceMatch": false,
         "displayOrder": 1,
@@ -770,6 +775,8 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
   * `ROUND_ROBIN` → `(N × (N - 1)) / 2` rodadas, nomeadas "Rodada 1", "Rodada 2", etc.
   * `DOUBLE_ROUND_ROBIN` → `N × (N - 1)` rodadas.
 * **KNOCKOUT**: rodadas geradas com base em `qualifiedTeams` e auto-nomeadas (ex.: "Semifinal", "Final"). Se `thirdPlaceMatch: true`, adiciona rodada "3º Lugar" em paralelo à "Final".
+* **KNOCKOUT**: também gera **partidas placeholder** da chave e **vínculos de avanço** (`MatchBracketLink`) entre rodadas.
+* `teamsToAdvance` em fases `GROUP_STAGE`: quantos times por grupo avançam para a fase `KNOCKOUT` seguinte (default `1`).
 * Rodadas podem ser ajustadas manualmente após o setup via endpoints individuais.
 * Complementa os endpoints individuais de criação de fase, grupo e rodada.
 
@@ -793,6 +800,7 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
       "name": "Pontos Corridos",
       "type": "GROUP_STAGE",
       "format": "ROUND_ROBIN",
+      "teamsToAdvance": 2,
       "qualifiedTeams": null,
       "thirdPlaceMatch": false,
       "displayOrder": 1,
@@ -1100,6 +1108,12 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
   "awayPenaltyScore": 3
 }
 ```
+
+### Notes
+
+* Ao encerrar partida de fase `KNOCKOUT`, dispara **avanço automático** do vencedor (e perdedor para 3º Lugar, quando configurado) para a partida vinculada na rodada seguinte.
+* Se todas as partidas de uma fase `GROUP_STAGE` estiverem encerradas, dispara **avanço automático** dos classificados para a primeira rodada da fase `KNOCKOUT` seguinte.
+* Alteração ou remoção de resultado deve recalcular vagas afetadas em cascata.
 
 ---
 

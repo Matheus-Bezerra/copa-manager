@@ -328,6 +328,7 @@ Exemplo:
       "type": "GROUP_STAGE",
       "order": 1,
       "format": "ROUND_ROBIN",
+      "teamsToAdvance": 2,
       "groups": [
         { "name": "Grupo A", "teams": 4 },
         { "name": "Grupo B", "teams": 4 }
@@ -345,6 +346,30 @@ Exemplo:
 ```
 
 Os endpoints individuais de criação de fase, grupo e rodada **complementam** o setup em lote para ajustes posteriores.
+
+## Avanço Automático (v1)
+
+O sistema deve propagar classificados e vencedores automaticamente com base em resultados.
+
+### Dentro de fase KNOCKOUT
+
+Ao **encerrar** uma partida eliminatória:
+
+* O **vencedor** (incluindo desempate por pênaltis) ocupa automaticamente a vaga correspondente na rodada seguinte da mesma fase.
+* O **perdedor** é eliminado, exceto quando houver rodada de **3º Lugar** (`thirdPlaceMatch: true`): perdedores das semifinais avançam automaticamente para essa rodada.
+* No setup em lote, o backend gera partidas placeholder da chave e os vínculos de avanço entre elas.
+
+### De GROUP_STAGE para fase seguinte
+
+Quando **todas as partidas** de uma fase `GROUP_STAGE` estiverem encerradas:
+
+* Os classificados de cada grupo (por posição na tabela) avançam automaticamente para a **primeira rodada** da fase imediatamente posterior em `displayOrder`, quando essa fase for `KNOCKOUT`.
+* A quantidade de classificados por grupo é informada no setup (`teamsToAdvance`, default `1`).
+* A ordem de preenchimento das vagas segue a classificação por grupo e o `displayOrder` dos grupos.
+
+### Reversão
+
+Se o resultado de uma partida eliminatória for **alterado ou removido** após o avanço, o sistema deve recalcular as vagas afetadas na rodada seguinte (e em cascata, se necessário).
 
 ## Consulta de Estrutura
 
@@ -367,18 +392,17 @@ O tipo da fase determina a visualização principal no frontend.
 A chave eliminatória na v1 é composta por **dois níveis**:
 
 1. **Timeline entre fases** — fases `KNOCKOUT` (e demais fases) exibidas em sequência pelo `displayOrder` do campeonato. Cada fase usa seu `name` como rótulo (ex.: "Oitavas", "Quartas", "Mata-Mata").
-2. **Rodadas dentro da fase** — dentro de cada fase `KNOCKOUT`, as rodadas geradas (`Semifinal`, `Final`, `3º Lugar`, etc.) formam a chave simplificada daquela fase.
+2. **Rodadas dentro da fase** — dentro de cada fase `KNOCKOUT`, as rodadas geradas (`Semifinal`, `Final`, `3º Lugar`, etc.) formam a chave daquela fase.
 
-Na v1, a chave é **visual e manual**:
+Na v1:
 
-* O organizador cria cada partida na rodada correta.
-* Não há avanço automático de vencedores entre rodadas ou entre fases.
-* A interface exibe cards ou lista por rodada (não é obrigatório bracket SVG interativo na v1).
+* A chave é atualizada **automaticamente** quando resultados são registrados (vencedores e, quando aplicável, perdedores para 3º lugar).
+* A interface exibe cards ou lista por rodada, refletindo times já classificados nas vagas (não é obrigatório bracket SVG interativo na v1).
+* A primeira rodada de fases `KNOCKOUT` pode ser preenchida manualmente ou via avanço automático da fase `GROUP_STAGE` anterior.
 
 ### Fora do escopo v1
 
 * Bracket interativo com linhas conectando confrontos.
-* Avanço automático de classificados com base em resultados.
 * Reordenação drag-and-drop de fases ou rodadas.
 
 ---

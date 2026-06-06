@@ -152,7 +152,7 @@ Dois níveis de navegação:
 
 Renderização v1: **lista ou cards por rodada** (chave simplificada). Bracket SVG interativo fica fora do escopo v1.
 
-Partidas são criadas **manualmente** na rodada correta; não há avanço automático de vencedores.
+Partidas eliminatórias são preenchidas **automaticamente** conforme resultados (vencedores e perdedores para 3º lugar). Vagas exibem placeholder (ex.: "A definir") até o avanço.
 
 ## Criar partida
 
@@ -164,6 +164,8 @@ Fase → Rodada → (Grupo, se GROUP_STAGE) → Mandante / Visitante / Data
 
 Payload: `roundId`, `groupId` (obrigatório em GROUP_STAGE), `homeTeamId`, `awayTeamId`, `scheduledAt`.
 
+Em fases `KNOCKOUT`, partidas da chave podem já existir via setup (placeholder); o organizador agenda e registra resultados — times entram via avanço automático.
+
 ## Portal público
 
 Mesma estrutura de tabs por fase (somente leitura), consumindo `/public/.../structure`, `/public/.../standings` e `/public/.../matches`.
@@ -171,5 +173,4 @@ Mesma estrutura de tabs por fase (somente leitura), consumindo `/public/.../stru
 ## Fora do escopo v1
 
 * Bracket interativo com linhas conectando confrontos.
-* Avanço automático de classificados.
 * Drag-and-drop para reordenar fases ou rodadas.

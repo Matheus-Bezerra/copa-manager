@@ -245,6 +245,7 @@ Representa uma fase do campeonato.
 * type
 * order
 * format (apenas GroupStage)
+* teamsToAdvance (apenas GroupStage, default 1)
 * qualifiedTeams (apenas Knockout)
 * thirdPlaceMatch (apenas Knockout)
 
@@ -252,7 +253,7 @@ Representa uma fase do campeonato.
 
 * Pertence a um campeonato.
 * Possui uma ou mais rodadas.
-* Se do tipo GroupStage, possui ao menos um grupo e deve informar `format`.
+* Se do tipo GroupStage, possui ao menos um grupo, deve informar `format` e pode informar `teamsToAdvance` (quantos times por grupo avançam para a fase seguinte).
 * Se do tipo Knockout, não possui grupos nem classificação; deve informar `qualifiedTeams`.
 * A ordem (`order`) pode ser informada pelo cliente no setup em lote ou atribuída automaticamente na criação individual.
 * A geração automática de rodadas ocorre via setup em lote; após o setup, rodadas podem ser ajustadas manualmente.
@@ -326,7 +327,27 @@ Representa uma partida.
 * Pertence a uma rodada.
 * Em fases GroupStage, pertence também a um grupo.
 * Pode gerar eventos.
-* Na v1, não existe vínculo automático entre partidas de rodadas consecutivas (sem avanço de vencedor entre rodadas ou fases).
+* Em fases Knockout, ao encerrar com resultado, o vencedor avança automaticamente para a partida vinculada na rodada seguinte; perdedores de semifinal avançam para 3º Lugar quando configurado.
+* Quando todas as partidas de uma fase GroupStage encerram, classificados avançam para a primeira rodada da fase Knockout seguinte.
+
+---
+
+## MatchBracketLink
+
+Representa o vínculo de avanço entre partidas eliminatórias.
+
+### Atributos
+
+* fromMatchId
+* toMatchId
+* outcome (Winner | Loser)
+* toSlot (Home | Away)
+
+### Regras
+
+* Aplica-se a partidas de fases Knockout.
+* Criado automaticamente no setup em lote da chave eliminatória.
+* Ao registrar resultado da partida de origem, o time correspondente preenche o slot na partida de destino.
 
 ---
 
@@ -524,10 +545,11 @@ Entidades internas:
 
 * MatchResult
 * MatchEvent
+* MatchBracketLink
 
 Responsabilidade:
 
-Garantir consistência dos eventos e resultados da partida.
+Garantir consistência dos eventos, resultados e avanços eliminatórios da partida.
 
 ---
 
@@ -669,6 +691,18 @@ Disparado quando uma partida inicia.
 ## MatchFinished
 
 Disparado quando uma partida é encerrada.
+
+---
+
+## TeamAdvancedInBracket
+
+Disparado quando um time avança automaticamente para partida da rodada seguinte (vencedor ou perdedor para 3º lugar).
+
+---
+
+## GroupStageClassified
+
+Disparado quando classificados de uma fase GroupStage preenchem vagas da fase Knockout seguinte.
 
 ---
 

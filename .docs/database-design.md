@@ -370,6 +370,7 @@ Fases do campeonato.
 * name
 * type
 * format
+* teams_to_advance
 * qualified_teams
 * third_place_match
 * display_order
@@ -383,6 +384,7 @@ Fases do campeonato.
 ### Notes
 
 * `format` é obrigatório quando `type` é `GROUP_STAGE`; nulo em `KNOCKOUT`.
+* `teams_to_advance` aplica-se a `GROUP_STAGE`; default `1`; define quantos times por grupo avançam para a fase seguinte.
 * `qualified_teams` é obrigatório quando `type` é `KNOCKOUT`; nulo em `GROUP_STAGE`.
 * `third_place_match` aplica-se apenas a `KNOCKOUT`; default `false`.
 * `display_order`: no setup em lote, informado pelo cliente; na criação individual, atribuído automaticamente pelo backend.
@@ -461,6 +463,7 @@ Partidas.
 
 * group_id é obrigatório quando a fase da rodada é GROUP_STAGE; nulo em fases KNOCKOUT.
 * O stage é derivado via round.stage_id.
+* Em fases `KNOCKOUT`, partidas podem ser criadas sem times (`home_team_id` / `away_team_id` nulos) como placeholder até avanço automático ou sorteio manual.
 
 ### Indexes
 
@@ -468,6 +471,32 @@ Partidas.
 * round_id
 * group_id
 * scheduled_at
+
+---
+
+## Match Bracket Links
+
+Vínculos de avanço entre partidas eliminatórias.
+
+### Columns
+
+* id
+* from_match_id
+* to_match_id
+* outcome
+* to_slot
+* created_at
+
+### Constraints
+
+* unique(from_match_id, outcome)
+
+### Notes
+
+* `outcome`: `WINNER` ou `LOSER` (ex.: perdedor de semifinal → 3º Lugar).
+* `to_slot`: `HOME` ou `AWAY` na partida de destino.
+* Criado automaticamente no setup em lote de fases `KNOCKOUT`.
+* Ao encerrar `from_match`, o time correspondente preenche o slot em `to_match`.
 
 ---
 
@@ -656,6 +685,20 @@ Premiações concedidas.
 
 ---
 
+## bracket_link_outcome
+
+* WINNER
+* LOSER
+
+---
+
+## bracket_link_slot
+
+* HOME
+* AWAY
+
+---
+
 # Relacionamentos Principais
 
 ```text
@@ -689,7 +732,8 @@ Player
 
 Match
  ├─ MatchResult
- └─ MatchEvents
+ ├─ MatchEvents
+ └─ MatchBracketLink (from / to)
 
 Round
  └─ Match
