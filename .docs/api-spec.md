@@ -399,6 +399,27 @@ Não concede acesso direto aos recursos da API.
 }
 ```
 
+### Response
+
+```json
+{
+  "data": {
+    "invitation": {
+      "id": "01HXYZ...",
+      "championshipId": "01HXYZ...",
+      "email": "usuario@email.com",
+      "role": "ORGANIZER",
+      "token": "abc123...",
+      "status": "PENDING",
+      "expiresAt": "2026-06-13T00:00:00.000Z",
+      "acceptedAt": null,
+      "createdAt": "2026-06-06T00:00:00.000Z",
+      "inviteUrl": "http://localhost:3000/invitations/accept?token=abc123..."
+    }
+  }
+}
+```
+
 ### Permission
 
 * Owner
