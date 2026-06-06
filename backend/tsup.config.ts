@@ -16,5 +16,6 @@ export default defineConfig({
     options.alias = {
       '@': path.join(srcDir, 'src'),
     };
+    options.jsx = 'automatic';
   },
 });
