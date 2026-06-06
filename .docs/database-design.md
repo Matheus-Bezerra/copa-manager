@@ -536,7 +536,6 @@ Premiações concedidas.
 * PENDING
 * ACCEPTED
 * EXPIRED
-* REVOKED
 
 ---
 

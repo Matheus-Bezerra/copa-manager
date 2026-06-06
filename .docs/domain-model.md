@@ -490,7 +490,6 @@ Garantir consistência dos eventos e resultados da partida.
 * Pending
 * Accepted
 * Expired
-* Revoked
 
 ---
 
