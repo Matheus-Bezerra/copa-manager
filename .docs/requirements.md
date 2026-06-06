@@ -300,6 +300,7 @@ Toda fase do tipo `GROUP_STAGE` deve possuir um ou mais grupos.
 * A classificação é calculada separadamente por grupo.
 * Na **criação individual** de grupo, a ordem é **atribuída automaticamente pelo backend** (próximo valor sequencial na fase).
 * No **setup em lote**, a ordem dos grupos segue a posição no array enviado.
+* No setup em lote, `teams` por grupo é usado **apenas para calcular rodadas**; **não é persistido**. A quantidade real de times exibida na interface vem dos times **cadastrados** no campeonato e vinculados às partidas do grupo.
 
 ## Rodadas
 
@@ -345,12 +346,40 @@ Exemplo:
 
 Os endpoints individuais de criação de fase, grupo e rodada **complementam** o setup em lote para ajustes posteriores.
 
+## Consulta de Estrutura
+
+O sistema deve disponibilizar a **estrutura completa do campeonato** em uma única consulta agregada: fases, grupos (quando aplicável) e rodadas, ordenados por `displayOrder` / `number`.
+
+Isso evita múltiplas requisições no frontend para montar tabs, wizard pós-setup e portal público.
+
 ## Visualização
 
-O tipo da fase determina a visualização principal no frontend:
+O tipo da fase determina a visualização principal no frontend.
 
-* **GROUP_STAGE**: tabela de classificação por grupo e listagem ou agenda de partidas por rodada.
-* **KNOCKOUT**: visualização em mapa ou chave, conectando fases eliminatórias em sequência. Cada fase `KNOCKOUT` usa seu `name` como rótulo no mapa (oitavas, 16 avos, etc.), sem necessidade de tipos adicionais.
+### GROUP_STAGE
+
+* Tabela de classificação por grupo.
+* Listagem ou agenda de partidas por rodada.
+* Sub-navegação por grupo quando houver mais de um.
+
+### KNOCKOUT (escopo v1)
+
+A chave eliminatória na v1 é composta por **dois níveis**:
+
+1. **Timeline entre fases** — fases `KNOCKOUT` (e demais fases) exibidas em sequência pelo `displayOrder` do campeonato. Cada fase usa seu `name` como rótulo (ex.: "Oitavas", "Quartas", "Mata-Mata").
+2. **Rodadas dentro da fase** — dentro de cada fase `KNOCKOUT`, as rodadas geradas (`Semifinal`, `Final`, `3º Lugar`, etc.) formam a chave simplificada daquela fase.
+
+Na v1, a chave é **visual e manual**:
+
+* O organizador cria cada partida na rodada correta.
+* Não há avanço automático de vencedores entre rodadas ou entre fases.
+* A interface exibe cards ou lista por rodada (não é obrigatório bracket SVG interativo na v1).
+
+### Fora do escopo v1
+
+* Bracket interativo com linhas conectando confrontos.
+* Avanço automático de classificados com base em resultados.
+* Reordenação drag-and-drop de fases ou rodadas.
 
 ---
 
@@ -400,6 +429,7 @@ Cada campeonato deve possuir uma página pública.
 A página pública deve disponibilizar:
 
 * Regulamento.
+* Estrutura do campeonato (fases, grupos e rodadas).
 * Classificação.
 * Calendário.
 * Resultados.

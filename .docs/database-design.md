@@ -409,6 +409,7 @@ Grupos dentro de uma fase do tipo GROUP_STAGE.
 ### Notes
 
 * `display_order` é atribuído pelo backend na criação (próximo valor sequencial na fase).
+* Não possui coluna de quantidade de times; `teams` no setup em lote é input transitório para geração de rodadas.
 
 ---
 

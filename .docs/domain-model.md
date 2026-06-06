@@ -281,6 +281,7 @@ Representa uma subdivisão dentro de uma fase do tipo GroupStage.
 * Possui classificação (Standings).
 * Partidas de fase de grupos referenciam o grupo.
 * A ordem (`order`) é atribuída automaticamente na criação individual; no setup em lote, segue a posição no array enviado.
+* A quantidade de times informada no setup em lote (`teams`) é **transiente** — serve só para gerar rodadas; não é atributo persistido do grupo.
 
 ---
 
@@ -325,6 +326,7 @@ Representa uma partida.
 * Pertence a uma rodada.
 * Em fases GroupStage, pertence também a um grupo.
 * Pode gerar eventos.
+* Na v1, não existe vínculo automático entre partidas de rodadas consecutivas (sem avanço de vencedor entre rodadas ou fases).
 
 ---
 

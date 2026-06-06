@@ -764,7 +764,7 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
 ### Notes
 
 * `order` é informado pelo cliente para cada fase.
-* `groups.teams` define a quantidade de times por grupo; usado para calcular rodadas em `GROUP_STAGE`. Não é persistido — serve apenas para geração.
+* `groups.teams` define a quantidade de times por grupo **apenas no momento do setup**; usado para calcular rodadas em `GROUP_STAGE`. **Não é persistido** — após o setup, a UI reflete os times cadastrados no campeonato.
 * A ordem dos grupos segue a posição no array (`displayOrder` 1, 2, 3...).
 * **GROUP_STAGE**: rodadas geradas com base em `format` e no maior `teams` entre os grupos.
   * `ROUND_ROBIN` → `(N × (N - 1)) / 2` rodadas, nomeadas "Rodada 1", "Rodada 2", etc.
@@ -805,6 +805,77 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
 ### Notes
 
 * Resultados ordenados por `displayOrder` ascendente.
+
+---
+
+## Get Championship Structure
+
+Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos e rodadas aninhados.
+
+### GET
+
+```http
+/championships/{championshipId}/structure
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "stages": [
+      {
+        "id": "",
+        "name": "Fase de Grupos",
+        "type": "GROUP_STAGE",
+        "format": "ROUND_ROBIN",
+        "qualifiedTeams": null,
+        "thirdPlaceMatch": false,
+        "displayOrder": 1,
+        "groups": [
+          {
+            "id": "",
+            "name": "Grupo A",
+            "displayOrder": 1
+          }
+        ],
+        "rounds": [
+          {
+            "id": "",
+            "number": 1,
+            "name": "Rodada 1"
+          }
+        ],
+        "createdAt": "2026-06-17T19:00:00Z"
+      },
+      {
+        "id": "",
+        "name": "Mata-Mata",
+        "type": "KNOCKOUT",
+        "format": null,
+        "qualifiedTeams": 4,
+        "thirdPlaceMatch": true,
+        "displayOrder": 2,
+        "groups": [],
+        "rounds": [
+          { "id": "", "number": 1, "name": "Semifinal" },
+          { "id": "", "number": 2, "name": "Final" },
+          { "id": "", "number": 3, "name": "3º Lugar" }
+        ],
+        "createdAt": "2026-06-17T19:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Notes
+
+* Fases ordenadas por `displayOrder` ascendente.
+* Grupos ordenados por `displayOrder` ascendente dentro de cada fase.
+* Rodadas ordenadas por `number` ascendente dentro de cada fase.
+* Partidas **não** são incluídas; use `GET /matches` filtrando por `roundId` quando necessário.
+* Preferir este endpoint para montar navegação por fases no frontend (admin e autenticado).
 
 ---
 
@@ -981,8 +1052,13 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
 ### GET
 
 ```http
-/championships/{championshipId}/matches
+/championships/{championshipId}/matches?roundId={roundId}&groupId={groupId}
 ```
+
+### Query Parameters
+
+* `roundId` (opcional) — filtra partidas de uma rodada.
+* `groupId` (opcional) — filtra partidas de um grupo (aplicável a fases `GROUP_STAGE`).
 
 ---
 
@@ -1186,6 +1262,27 @@ Endpoints disponíveis sem autenticação.
 
 ---
 
+## Public Structure
+
+Retorna a estrutura completa do campeonato (fases, grupos e rodadas) para o portal público.
+
+### GET
+
+```http
+/public/championships/{slug}/structure
+```
+
+### Response
+
+Mesmo formato de `GET /championships/{championshipId}/structure`.
+
+### Notes
+
+* Disponível sem autenticação.
+* Partidas não são incluídas; use `GET /public/championships/{slug}/matches` com filtros quando necessário.
+
+---
+
 ## Public Standings
 
 ### GET
@@ -1206,8 +1303,13 @@ Endpoints disponíveis sem autenticação.
 ### GET
 
 ```http
-/public/championships/{slug}/matches
+/public/championships/{slug}/matches?roundId={roundId}&groupId={groupId}
 ```
+
+### Query Parameters
+
+* `roundId` (opcional) — filtra partidas de uma rodada.
+* `groupId` (opcional) — filtra partidas de um grupo.
 
 ---
 

@@ -103,3 +103,73 @@ O `prettier/prettier` fica **off** no ESLint de propósito: no save, o Prettier 
 * Formatação pesada via script (`npm run format`), não no save
 * Save corrige apenas indentação e excesso de linhas em branco
 * Linhas em branco intencionais no JSX são preservadas
+
+---
+
+# Estrutura de Campeonato (v1)
+
+## Fonte de dados
+
+Preferir **`GET /championships/{id}/structure`** (admin) ou **`GET /public/championships/{slug}/structure`** (público) para montar a navegação do campeonato.
+
+Evitar encadear `GET /stages` + `GET /groups` + `GET /rounds` por fase.
+
+Partidas são carregadas separadamente via `GET /matches`, filtrando por `roundId` (e `groupId` quando aplicável).
+
+## Fluxo do organizador
+
+```text
+Criar campeonato → Wizard setup (/stages/setup) → Cadastrar times → Agendar partidas por rodada → Registrar resultados
+```
+
+### Wizard de setup
+
+Tela multi-step que monta o payload de `POST /stages/setup`:
+
+1. Adicionar fases em sequência (o front define `order` pela posição no array).
+2. Por fase `GROUP_STAGE`: nome, formato, lista de grupos (nome + `teams` para preview de rodadas).
+3. Por fase `KNOCKOUT`: nome, `qualifiedTeams`, `thirdPlaceMatch`.
+4. Preview: quantidade de rodadas que serão geradas antes do submit.
+
+`teams` por grupo é usado só no wizard; após salvar, a UI de classificação reflete times **cadastrados**, não o número informado no setup.
+
+## Telas por fase
+
+Navegação principal: **tabs ou timeline** por fase (`displayOrder`).
+
+### GROUP_STAGE
+
+* Sub-tabs por grupo (quando houver mais de um).
+* **Tabela** de classificação: `GET /standings?stageId&groupId`.
+* **Rodadas**: lista/accordion por round; partidas da rodada via `GET /matches?roundId=`.
+
+### KNOCKOUT (v1)
+
+Dois níveis de navegação:
+
+1. Timeline do campeonato — fases em sequência pelo `displayOrder`.
+2. Dentro da fase — rodadas geradas (`Semifinal`, `Final`, `3º Lugar`, etc.).
+
+Renderização v1: **lista ou cards por rodada** (chave simplificada). Bracket SVG interativo fica fora do escopo v1.
+
+Partidas são criadas **manualmente** na rodada correta; não há avanço automático de vencedores.
+
+## Criar partida
+
+Seleção em cascata:
+
+```text
+Fase → Rodada → (Grupo, se GROUP_STAGE) → Mandante / Visitante / Data
+```
+
+Payload: `roundId`, `groupId` (obrigatório em GROUP_STAGE), `homeTeamId`, `awayTeamId`, `scheduledAt`.
+
+## Portal público
+
+Mesma estrutura de tabs por fase (somente leitura), consumindo `/public/.../structure`, `/public/.../standings` e `/public/.../matches`.
+
+## Fora do escopo v1
+
+* Bracket interativo com linhas conectando confrontos.
+* Avanço automático de classificados.
+* Drag-and-drop para reordenar fases ou rodadas.
