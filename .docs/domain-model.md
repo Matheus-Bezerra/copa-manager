@@ -471,11 +471,9 @@ Garantir consistência dos eventos e resultados da partida.
 
 ## ChampionshipStatus
 
-* Draft
 * Open
 * InProgress
 * Finished
-* Archived
 
 ---
 

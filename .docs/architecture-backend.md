@@ -383,6 +383,65 @@ npm run lint:fix     # Correções automáticas ESLint
 
 ---
 
+## Seeds (dados padrão)
+
+Seeds populam o banco com dados de desenvolvimento para testar rotas sem criar tudo manualmente.
+
+### Estrutura
+
+```text
+prisma/seeds/
+├── index.ts                  # Orquestrador — chama os seeders na ordem correta
+├── prisma.ts                 # Instância do Prisma Client para seeds
+├── constants/
+│   └── seed-data.ts          # IDs, e-mails, slugs e payloads fixos
+├── create-users.ts
+├── create-championships.ts
+├── create-teams.ts
+├── create-players.ts
+└── create-invitations.ts
+```
+
+### Padrão
+
+1. **`index.ts`** importa e executa cada seeder na ordem de dependência (users → championships → teams → players).
+2. **Um arquivo por domínio** — cada `create-*.ts` exporta uma função async que recebe dados já criados pelos seeders anteriores.
+3. **`constants/seed-data.ts`** concentra IDs fixos, e-mails e payloads reutilizáveis.
+4. **`prisma/seeds/prisma.ts`** expõe o client usado apenas pelos seeds (carrega `DATABASE_URL` via `dotenv`).
+5. Preferir **`upsert`** para que o seed seja idempotente (pode rodar várias vezes sem duplicar).
+
+Exemplo de orquestração:
+
+```ts
+const users = await createUsers();
+const { championship } = await createChampionships(users);
+await createTeams(championship);
+await createPlayers();
+await createInvitations(championship);
+```
+
+### Dados padrão incluídos
+
+| Recurso | Detalhes |
+|---------|----------|
+| Users | `owner@`, `admin@`, `organizer@copamanager.test` — senha `12345678` |
+| Championship | "Copa AD Tatuapé" — slug `copa-ad-tatuape`, status `IN_PROGRESS` |
+| Members | Owner, Administrator e Organizer |
+| Teams | 4 equipes com cores |
+| Players | 6 jogadores com estatísticas |
+| Invitation | Convite pendente para `convidado@copamanager.test` |
+
+### Comandos
+
+```bash
+npm run db:seed              # Executa os seeds manualmente
+npx prisma db seed           # Executa via Prisma (usa seed do prisma.config.ts)
+```
+
+O seed também roda automaticamente após `prisma migrate dev` quando configurado em `prisma.config.ts`.
+
+---
+
 ## Comandos úteis
 
 ```bash
@@ -392,6 +451,7 @@ npm run lint         # Verificação ESLint
 npm run format       # Formatação Prettier
 npm run db:migrate   # Rodar migrações Prisma
 npm run db:generate  # Gerar client Prisma
+npm run db:seed      # Popular banco com dados padrão
 npm run db:studio    # Interface visual do banco
 ```
 
@@ -411,6 +471,7 @@ npm run db:studio    # Interface visual do banco
 | Error handler global | `src/config/error.config.ts` |
 | Logger | `src/utils/logger.ts` |
 | Prisma client | `src/lib/prisma.ts` |
+| Seeds | `prisma/seeds/index.ts` |
 | JWT | `src/config/jwt.config.ts` |
 | Auth middleware | `src/http/middlewares/auth.middleware.ts` |
 

@@ -42,11 +42,13 @@ Quando aplicável:
 
 ## Soft Delete
 
-As entidades administrativas devem suportar exclusão lógica.
+Apenas entidades de identidade (ex.: Users) suportam exclusão lógica.
 
 Campo padrão:
 
 * deleted_at
+
+Campeonatos, equipes e jogadores utilizam exclusão física (hard delete).
 
 ---
 
@@ -156,11 +158,14 @@ Representa campeonatos.
 * status
 * created_at
 * updated_at
-* deleted_at
 
 ### Constraints
 
 * slug unique
+
+### Notes
+
+* Exclusão física (hard delete).
 
 ### Indexes
 
@@ -285,7 +290,10 @@ Critérios de desempate.
 * primary_color
 * created_at
 * updated_at
-* deleted_at
+
+### Notes
+
+* Exclusão física (hard delete).
 
 ### Indexes
 
@@ -306,7 +314,10 @@ Critérios de desempate.
 * shirt_number
 * created_at
 * updated_at
-* deleted_at
+
+### Notes
+
+* Exclusão física (hard delete).
 
 ### Indexes
 
@@ -503,11 +514,9 @@ Premiações concedidas.
 
 ## championship_status
 
-* DRAFT
 * OPEN
 * IN_PROGRESS
 * FINISHED
-* ARCHIVED
 
 ---
 
