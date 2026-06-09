@@ -140,4 +140,59 @@ export const errorMessage = {
     message: 'Player not found',
     statusCode: 404,
   },
+  stageNotFound: {
+    code: 'STAGE/NOT_FOUND',
+    message: 'Stage not found',
+    statusCode: 404,
+  },
+  groupNotFound: {
+    code: 'GROUP/NOT_FOUND',
+    message: 'Group not found',
+    statusCode: 404,
+  },
+  roundNotFound: {
+    code: 'ROUND/NOT_FOUND',
+    message: 'Round not found',
+    statusCode: 404,
+  },
+  matchNotFound: {
+    code: 'MATCH/NOT_FOUND',
+    message: 'Match not found',
+    statusCode: 404,
+  },
+  matchResultNotFound: {
+    code: 'MATCH/RESULT_NOT_FOUND',
+    message: 'Match result not found',
+    statusCode: 404,
+  },
+  matchAlreadyFinished: {
+    code: 'MATCH/ALREADY_FINISHED',
+    message: 'Match is already finished',
+    statusCode: 409,
+  },
+  matchCancelled: {
+    code: 'MATCH/CANCELLED',
+    message: 'Match has been cancelled',
+    statusCode: 409,
+  },
+  stageInvalidFormat: {
+    code: 'STAGE/INVALID_FORMAT',
+    message: 'Stage format is required for GROUP_STAGE and must not be set for KNOCKOUT',
+    statusCode: 422,
+  },
+  stageInvalidQualifiedTeams: {
+    code: 'STAGE/INVALID_QUALIFIED_TEAMS',
+    message: 'qualifiedTeams must be a power of 2 (e.g. 2, 4, 8, 16)',
+    statusCode: 422,
+  },
+  stageGroupRequired: {
+    code: 'STAGE/GROUP_REQUIRED',
+    message: 'At least one group is required for GROUP_STAGE',
+    statusCode: 422,
+  },
+  stageDuplicateOrder: {
+    code: 'STAGE/DUPLICATE_ORDER',
+    message: 'Stage order must be unique within the championship',
+    statusCode: 409,
+  },
 } as const satisfies Record<string, AppError>;

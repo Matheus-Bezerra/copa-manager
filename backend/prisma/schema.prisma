@@ -30,6 +30,47 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum StageType {
+  GROUP_STAGE
+  KNOCKOUT
+}
+
+enum StageFormat {
+  ROUND_ROBIN
+  DOUBLE_ROUND_ROBIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+}
+
+enum MatchEventType {
+  GOAL
+  YELLOW_CARD
+  RED_CARD
+  MVP
+}
+
+enum BracketLinkOutcome {
+  WINNER
+  LOSER
+}
+
+enum BracketLinkSlot {
+  HOME
+  AWAY
+}
+
+enum AwardType {
+  TOP_SCORER
+  MATCH_MVP
+  TOURNAMENT_MVP
+  FAIR_PLAY
+}
+
 model User {
   id           String     @id
   name         String
@@ -97,10 +138,15 @@ model Championship {
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
   owner       User                 @relation("ChampionshipOwner", fields: [ownerUserId], references: [id])
-  
+
   members     ChampionshipMember[]
   invitations Invitation[]
   teams       Team[]
+  stages      Stage[]
+  matches     Match[]
+  standings   Standing[]
+  awards      Award[]
+  rules       ChampionshipRules?
 
   @@index([slug])
   @@index([ownerUserId])
@@ -154,8 +200,12 @@ model Team {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
-  players      Player[]
+  championship  Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  players       Player[]
+  homeMatches   Match[]      @relation("HomeMatches")
+  awayMatches   Match[]      @relation("AwayMatches")
+  standings     Standing[]
+  matchEvents   MatchEvent[]
 
   @@index([championshipId])
   @@index([name])
@@ -170,8 +220,10 @@ model Player {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  team       Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  statistics PlayerStatistics?
+  team        Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  statistics  PlayerStatistics?
+  matchEvents MatchEvent[]
+  awards      Award[]
 
   @@index([teamId])
   @@index([name])
@@ -195,4 +247,207 @@ model PlayerStatistics {
   @@index([goals])
   @@index([matchMvps])
   @@map("player_statistics")
+}
+
+model Stage {
+  id               String      @id
+  championshipId   String      @map("championship_id")
+  name             String
+  type             StageType
+  format           StageFormat? @map("format")
+  teamsToAdvance   Int         @default(1) @map("teams_to_advance")
+  qualifiedTeams   Int?        @map("qualified_teams")
+  thirdPlaceMatch  Boolean     @default(false) @map("third_place_match")
+  displayOrder     Int         @map("display_order")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  groups       Group[]
+  rounds       Round[]
+
+  @@index([championshipId])
+  @@index([displayOrder])
+  @@map("stages")
+}
+
+model Group {
+  id           String   @id
+  stageId      String   @map("stage_id")
+  name         String
+  displayOrder Int      @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  stage    Stage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  matches  Match[]
+  standings Standing[]
+
+  @@index([stageId])
+  @@index([displayOrder])
+  @@map("groups")
+}
+
+model Round {
+  id        String   @id
+  stageId   String   @map("stage_id")
+  number    Int
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  stage   Stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  matches Match[]
+
+  @@unique([stageId, number])
+  @@index([stageId])
+  @@map("rounds")
+}
+
+model Match {
+  id             String      @id
+  championshipId String      @map("championship_id")
+  roundId        String      @map("round_id")
+  groupId        String?     @map("group_id")
+  homeTeamId     String?     @map("home_team_id")
+  awayTeamId     String?     @map("away_team_id")
+  scheduledAt    DateTime?   @map("scheduled_at")
+  status         MatchStatus @default(SCHEDULED)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  championship    Championship     @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  round           Round            @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  group           Group?           @relation(fields: [groupId], references: [id])
+  homeTeam        Team?            @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  awayTeam        Team?            @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  result          MatchResult?
+  events          MatchEvent[]
+  bracketLinksFrom MatchBracketLink[] @relation("FromMatch")
+  bracketLinksTo   MatchBracketLink[] @relation("ToMatch")
+
+  @@index([championshipId])
+  @@index([roundId])
+  @@index([groupId])
+  @@index([scheduledAt])
+  @@map("matches")
+}
+
+model MatchResult {
+  id               String   @id
+  matchId          String   @unique @map("match_id")
+  homeScore        Int      @map("home_score")
+  awayScore        Int      @map("away_score")
+  homePenaltyScore Int?     @map("home_penalty_score")
+  awayPenaltyScore Int?     @map("away_penalty_score")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("match_results")
+}
+
+model MatchEvent {
+  id        String         @id
+  matchId   String         @map("match_id")
+  playerId  String?        @map("player_id")
+  teamId    String?        @map("team_id")
+  eventType MatchEventType @map("event_type")
+  minute    Int?
+  notes     String?
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  match  Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player? @relation(fields: [playerId], references: [id])
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  @@index([matchId])
+  @@index([playerId])
+  @@index([eventType])
+  @@map("match_events")
+}
+
+model MatchBracketLink {
+  id          String             @id
+  fromMatchId String             @map("from_match_id")
+  toMatchId   String             @map("to_match_id")
+  outcome     BracketLinkOutcome
+  toSlot      BracketLinkSlot    @map("to_slot")
+  createdAt   DateTime           @default(now()) @map("created_at")
+
+  fromMatch Match @relation("FromMatch", fields: [fromMatchId], references: [id], onDelete: Cascade)
+  toMatch   Match @relation("ToMatch", fields: [toMatchId], references: [id], onDelete: Cascade)
+
+  @@unique([fromMatchId, outcome])
+  @@map("match_bracket_links")
+}
+
+model Standing {
+  id             String   @id
+  championshipId String   @map("championship_id")
+  stageId        String   @map("stage_id")
+  groupId        String   @map("group_id")
+  teamId         String   @map("team_id")
+  position       Int      @default(0)
+  points         Int      @default(0)
+  wins           Int      @default(0)
+  draws          Int      @default(0)
+  losses         Int      @default(0)
+  goalsScored    Int      @default(0) @map("goals_scored")
+  goalsConceded  Int      @default(0) @map("goals_conceded")
+  goalDifference Int      @default(0) @map("goal_difference")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  group        Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  team         Team         @relation(fields: [teamId], references: [id])
+
+  @@unique([stageId, groupId, teamId])
+  @@index([championshipId])
+  @@index([stageId])
+  @@index([groupId])
+  @@index([position])
+  @@map("standings")
+}
+
+model ChampionshipRules {
+  id                       String   @id
+  championshipId           String   @unique @map("championship_id")
+  winPoints                Int      @default(3) @map("win_points")
+  drawPoints               Int      @default(1) @map("draw_points")
+  penaltyBonusPoints       Int      @default(0) @map("penalty_bonus_points")
+  yellowCardsForSuspension Int      @default(3) @map("yellow_cards_for_suspension")
+  redCardSuspensionGames   Int      @default(1) @map("red_card_suspension_games")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  championship   Championship    @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  tieBreakerRules TieBreakerRule[]
+
+  @@map("championship_rules")
+}
+
+model TieBreakerRule {
+  id             String @id
+  championshipId String @map("championship_id")
+  position       Int
+  criterion      String
+
+  rules ChampionshipRules @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+
+  @@unique([championshipId, position])
+  @@index([championshipId])
+  @@map("tie_breaker_rules")
+}
+
+model Award {
+  id             String    @id
+  championshipId String    @map("championship_id")
+  playerId       String    @map("player_id")
+  awardType      AwardType @map("award_type")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  player       Player       @relation(fields: [playerId], references: [id])
+
+  @@index([championshipId])
+  @@index([playerId])
+  @@map("awards")
 }
