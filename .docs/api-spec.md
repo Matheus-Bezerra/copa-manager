@@ -1231,6 +1231,120 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
 
 ---
 
+# Championship Rules
+
+## Get Championship Rules
+
+Retorna as regras de pontuação do campeonato.
+
+### GET
+
+```http
+/championships/{championshipId}/rules
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "winPoints": 3,
+    "drawPoints": 1,
+    "penaltyBonusPoints": 0
+  }
+}
+```
+
+### Notes
+
+* Se o registro ainda não foi configurado, retorna os valores padrão (`winPoints: 3`, `drawPoints: 1`, `penaltyBonusPoints: 0`).
+
+---
+
+## Update Championship Rules
+
+### PUT
+
+```http
+/championships/{championshipId}/rules
+```
+
+### Request
+
+```json
+{
+  "winPoints": 3,
+  "drawPoints": 1,
+  "penaltyBonusPoints": 0
+}
+```
+
+### Notes
+
+* Todos os campos são opcionais; campos omitidos mantêm o valor atual.
+* `winPoints` e `drawPoints` devem ser inteiros ≥ 0.
+* Altera pontuações retroativamente apenas ao recalcular standings.
+
+---
+
+## List Tie-Breaker Rules
+
+Retorna os critérios de desempate configurados para o campeonato.
+
+### GET
+
+```http
+/championships/{championshipId}/tie-breaker-rules
+```
+
+### Response
+
+```json
+{
+  "data": [
+    { "position": 1, "criterion": "POINTS" },
+    { "position": 2, "criterion": "WINS" },
+    { "position": 3, "criterion": "GOAL_DIFFERENCE" },
+    { "position": 4, "criterion": "GOALS_SCORED" }
+  ]
+}
+```
+
+### Notes
+
+* Se não configurado, retorna a lista padrão: `POINTS → WINS → GOAL_DIFFERENCE → GOALS_SCORED`.
+
+---
+
+## Update Tie-Breaker Rules
+
+### PUT
+
+```http
+/championships/{championshipId}/tie-breaker-rules
+```
+
+### Request
+
+```json
+{
+  "rules": [
+    { "position": 1, "criterion": "POINTS" },
+    { "position": 2, "criterion": "HEAD_TO_HEAD" },
+    { "position": 3, "criterion": "GOAL_DIFFERENCE" },
+    { "position": 4, "criterion": "GOALS_SCORED" }
+  ]
+}
+```
+
+### Notes
+
+* A lista substituí por completo as regras anteriores.
+* `position` deve ser único e sequencial a partir de 1.
+* `criterion` aceita: `POINTS`, `WINS`, `GOAL_DIFFERENCE`, `GOALS_SCORED`, `HEAD_TO_HEAD`.
+
+---
+
 # Awards
 
 ## Get Awards

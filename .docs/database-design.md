@@ -590,6 +590,50 @@ Classificação por grupo dentro de uma fase.
 
 ---
 
+# Championship Configuration
+
+## championship_rules
+
+Regras de pontuação do campeonato (uma por campeonato).
+
+### Columns
+
+* id
+* championship_id (FK → championships, unique)
+* win_points (default 3)
+* draw_points (default 1)
+* penalty_bonus_points (default 0)
+* created_at
+* updated_at
+
+### Constraints
+
+* unique(championship_id)
+
+---
+
+## tie_breaker_rules
+
+Critérios de desempate configurados para o campeonato, ordenados por posição.
+
+### Columns
+
+* id
+* championship_id (FK → championships)
+* criterion (enum: POINTS, WINS, GOAL_DIFFERENCE, GOALS_SCORED, HEAD_TO_HEAD)
+* position (Int — ordem de aplicação)
+* created_at
+
+### Constraints
+
+* unique(championship_id, position)
+
+### Indexes
+
+* championship_id
+
+---
+
 # Awards
 
 ## Awards
@@ -709,8 +753,8 @@ User
  └─ RefreshToken
 
 Championship
- ├─ ChampionshipRules
- ├─ TieBreakerRules
+ ├─ ChampionshipRules (1:1 — championship_rules)
+ ├─ TieBreakerRules  (1:N — tie_breaker_rules)
  ├─ ChampionshipMembers
  ├─ Invitations
  ├─ Teams

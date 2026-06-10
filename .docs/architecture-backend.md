@@ -31,15 +31,64 @@ backend/
 │   ├── constants/             # Constantes globais (erros, paginação, etc.)
 │   ├── http/
 │   │   ├── routes/            # Agrupamento de rotas por domínio
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── championship.routes.ts
+│   │   │   ├── championship-rules.routes.ts
+│   │   │   ├── championship-member.routes.ts
+│   │   │   ├── team.routes.ts
+│   │   │   ├── player.routes.ts
+│   │   │   ├── stage.routes.ts       # stages, groups, rounds
+│   │   │   ├── match.routes.ts
+│   │   │   ├── match-event.routes.ts
+│   │   │   ├── standings.routes.ts
+│   │   │   └── public.routes.ts
 │   │   ├── controllers/       # Handlers HTTP (fino — só orquestra)
+│   │   │   ├── auth/
+│   │   │   ├── championships/ # inclui list-awards, grant-award
+│   │   │   ├── championship-rules/
+│   │   │   ├── groups/
+│   │   │   ├── match-events/
+│   │   │   ├── matches/
+│   │   │   ├── rounds/
+│   │   │   ├── stages/
+│   │   │   ├── standings/
+│   │   │   └── public/
 │   │   ├── schemas/           # Schemas Zod (validação + documentação OpenAPI)
 │   │   ├── middlewares/       # Auth e middlewares HTTP
 │   │   └── plugins/           # Plugins Fastify customizados (se necessário)
 │   ├── use-cases/             # Lógica de negócio por domínio
+│   │   ├── auth/
+│   │   ├── championships/     # inclui list-awards, grant-award
+│   │   ├── championship-rules/
+│   │   ├── groups/
+│   │   ├── match-events/
+│   │   ├── matches/
+│   │   ├── rounds/
+│   │   ├── stages/
+│   │   ├── standings/
+│   │   └── public/            # use cases públicos sem autenticação
 │   ├── repositories/          # Interfaces de repositório
 │   ├── prisma/
 │   │   └── repositories/      # Implementações Prisma dos repositórios
-│   ├── services/              # Serviços auxiliares (token, standings, etc.)
+│   ├── services/
+│   │   ├── championship/      # Serviços de acesso ao campeonato (autorização)
+│   │   └── competition/       # Lógica de competição reutilizável
+│   │       ├── calculate-group-stage-rounds.ts
+│   │       ├── calculate-knockout-rounds.ts
+│   │       ├── generate-knockout-bracket.ts
+│   │       ├── standings-calculator.ts
+│   │       ├── tie-breaker.ts
+│   │       ├── resolve-standings-config.ts
+│   │       ├── resolve-match-outcome.ts
+│   │       ├── fill-match-slot.ts
+│   │       ├── advance-winner-in-bracket.ts
+│   │       ├── advance-loser-to-third-place.ts
+│   │       ├── advance-group-stage-classified.ts
+│   │       ├── revert-bracket-cascade.ts
+│   │       ├── validate-setup-payload.ts
+│   │       ├── validate-match-event-registration.ts
+│   │       ├── validate-tie-breaker-rules.ts
+│   │       └── update-player-statistics-from-event.ts
 │   ├── lib/                   # Clientes externos (prisma, zod, configs de bibliotecas…)
 │   ├── utils/                 # Helpers (logger, erros, validações, funções reutilizaveis…)
 │   └── @types/                # Extensões de tipos (FastifyRequest, JWT…)
@@ -391,15 +440,16 @@ Seeds populam o banco com dados de desenvolvimento para testar rotas sem criar t
 
 ```text
 prisma/seeds/
-├── index.ts                  # Orquestrador — chama os seeders na ordem correta
-├── prisma.ts                 # Instância do Prisma Client para seeds
+├── index.ts                          # Orquestrador — chama os seeders na ordem correta
+├── prisma.ts                         # Instância do Prisma Client para seeds
 ├── constants/
-│   └── seed-data.ts          # IDs, e-mails, slugs e payloads fixos
+│   └── seed-data.ts                  # IDs, e-mails, slugs e payloads fixos
 ├── create-users.ts
 ├── create-championships.ts
 ├── create-teams.ts
 ├── create-players.ts
-└── create-invitations.ts
+├── create-invitations.ts
+└── create-competition-structure.ts   # Fases, grupos, rodadas, partidas, standings e bracket
 ```
 
 ### Padrão
@@ -418,6 +468,7 @@ const { championship } = await createChampionships(users);
 await createTeams(championship);
 await createPlayers();
 await createInvitations(championship);
+await createCompetitionStructure(championship);
 ```
 
 ### Dados padrão incluídos
@@ -427,9 +478,11 @@ await createInvitations(championship);
 | Users | `owner@`, `admin@`, `organizer@copamanager.test` — senha `12345678` |
 | Championship | "Copa AD Tatuapé" — slug `copa-ad-tatuape`, status `IN_PROGRESS` |
 | Members | Owner, Administrator e Organizer |
-| Teams | 4 equipes com cores |
-| Players | 6 jogadores com estatísticas |
+| Teams | 4 equipes (Flamengo, Palmeiras, Corinthians, São Paulo) |
+| Players | 6 jogadores com estatísticas pré-populadas |
 | Invitation | Convite pendente para `convidado@copamanager.test` |
+| Fase de Grupos | ROUND_ROBIN — Grupo A (FLA, PAL, COR) com 3 partidas finalizadas e standings calculados; Grupo B (SAO, COR) com partida agendada |
+| Mata-Mata | Semifinais + Final com `MatchBracketLink`s WINNER→HOME/AWAY; FLA já posicionado como classificado do Grupo A |
 
 ### Comandos
 
@@ -474,6 +527,13 @@ npm run db:studio    # Interface visual do banco
 | Seeds | `prisma/seeds/index.ts` |
 | JWT | `src/config/jwt.config.ts` |
 | Auth middleware | `src/http/middlewares/auth.middleware.ts` |
+| Rotas de competição | `src/http/routes/stage.routes.ts`, `match.routes.ts`, `standings.routes.ts` |
+| Rotas de eventos | `src/http/routes/match-event.routes.ts` |
+| Rotas de regras | `src/http/routes/championship-rules.routes.ts` |
+| Lógica de grupos/mata-mata | `src/services/competition/` |
+| Cálculo de standings | `src/services/competition/standings-calculator.ts` |
+| Desempate | `src/services/competition/tie-breaker.ts` |
+| Avanço automático | `src/use-cases/matches/process-match-finished.ts` |
 
 ---
 
