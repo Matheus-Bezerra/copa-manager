@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { render } from '@react-email/render';
 import { Resend } from 'resend';
 import { env } from '@/config/env';
+import { getEmailInlineAttachments } from '@/emails/email-inline-assets';
 import InvitationEmail from '@/emails/invitation-email';
 import PasswordResetEmail from '@/emails/password-reset-email';
 import type {
@@ -27,6 +28,7 @@ export class ResendEmailService implements EmailService {
       to: input.to,
       subject: 'Redefinição de senha — Copa Manager',
       html,
+      attachments: getEmailInlineAttachments(),
     });
 
     if (error) {
@@ -49,6 +51,7 @@ export class ResendEmailService implements EmailService {
       to: input.to,
       subject: 'Convite para o campeonato — Copa Manager',
       html,
+      attachments: getEmailInlineAttachments(),
     });
 
     if (error) {

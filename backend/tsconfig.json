@@ -23,6 +23,6 @@
     },
     "baseUrl": "."
   },
-  "include": ["src/**/*", "prisma/seeds/**/*"],
+  "include": ["src/**/*", "prisma/seeds/**/*", "tsup.config.ts"],
   "exclude": ["node_modules", "build"]
 }

@@ -8,6 +8,7 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components';
+import { EmailHeader } from '@/emails/components/email-header';
 
 export interface PasswordResetEmailProps {
   userName: string;
@@ -25,9 +26,7 @@ export function PasswordResetEmail({ userName, code, expiresInMinutes }: Passwor
 
         <Body className="bg-gray-100 py-10 px-5 font-sans">
           <Container className="mx-auto max-w-lg rounded-2xl bg-white px-8 py-8">
-            <Section className="rounded-3xl bg-[#16a34a] py-6 text-center">
-              <Text className="m-0 text-2xl font-bold tracking-wide text-white">Copa Manager</Text>
-            </Section>
+            <EmailHeader />
 
             <Container className="mt-8 space-y-4 text-center">
               <Text className="m-0 text-xl text-gray-800">
