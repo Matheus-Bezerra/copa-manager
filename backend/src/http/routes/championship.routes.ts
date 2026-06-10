@@ -10,6 +10,10 @@ import { deleteChampionshipSchema } from '@/http/schemas/championships/delete-ch
 import { getChampionshipSchema } from '@/http/schemas/championships/get-championship.schema';
 import { listChampionshipsSchema } from '@/http/schemas/championships/list-championships.schema';
 import { updateChampionshipSchema } from '@/http/schemas/championships/update-championship.schema';
+import { listAwardsSchema } from '@/http/schemas/championships/award.schema';
+import { grantAwardSchema } from '@/http/schemas/championships/award.schema';
+import { listAwardsController } from '@/http/controllers/championships/list-awards.controller';
+import { grantAwardController } from '@/http/controllers/championships/grant-award.controller';
 
 export async function championshipRoutes(app: FastifyInstance) {
   await app.register(auth);
@@ -31,4 +35,7 @@ export async function championshipRoutes(app: FastifyInstance) {
     { schema: deleteChampionshipSchema },
     deleteChampionshipController
   );
+
+  app.get('/championships/:championshipId/awards', { schema: listAwardsSchema }, listAwardsController);
+  app.post('/championships/:championshipId/awards', { schema: grantAwardSchema }, grantAwardController);
 }

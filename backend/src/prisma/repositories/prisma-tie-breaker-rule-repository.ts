@@ -17,6 +17,29 @@ export class PrismaTieBreakerRuleRepository implements TieBreakerRuleRepository 
     return prisma.tieBreakerRule.create({ data })
   }
 
+  async replaceByChampionshipId(
+    championshipId: string,
+    rules: Omit<CreateTieBreakerRuleInput, 'championshipId'>[],
+  ): Promise<TieBreakerRule[]> {
+    return prisma.$transaction(async (tx) => {
+      await tx.tieBreakerRule.deleteMany({ where: { championshipId } })
+
+      const created: TieBreakerRule[] = []
+
+      for (const rule of rules) {
+        const entry = await tx.tieBreakerRule.create({
+          data: {
+            ...rule,
+            championshipId,
+          },
+        })
+        created.push(entry)
+      }
+
+      return created
+    })
+  }
+
   async delete(id: string): Promise<void> {
     await prisma.tieBreakerRule.delete({ where: { id } })
   }

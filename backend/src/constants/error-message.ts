@@ -195,4 +195,64 @@ export const errorMessage = {
     message: 'Stage order must be unique within the championship',
     statusCode: 409,
   },
+  matchSameTeam: {
+    code: 'MATCH/SAME_TEAM',
+    message: 'Home and away teams must be different',
+    statusCode: 422,
+  },
+  matchGroupRequired: {
+    code: 'MATCH/GROUP_REQUIRED',
+    message: 'groupId is required for GROUP_STAGE matches',
+    statusCode: 422,
+  },
+  matchTeamsRequired: {
+    code: 'MATCH/TEAMS_REQUIRED',
+    message: 'Both home and away teams must be set to register a result',
+    statusCode: 422,
+  },
+  matchInvalidScore: {
+    code: 'MATCH/INVALID_SCORE',
+    message: 'Scores must be zero or greater',
+    statusCode: 422,
+  },
+  matchKnockoutDrawRequiresPenalties: {
+    code: 'MATCH/KNOCKOUT_DRAW_REQUIRES_PENALTIES',
+    message: 'Knockout matches tied after regular time require penalty scores',
+    statusCode: 422,
+  },
+  matchEventNotAllowed: {
+    code: 'MATCH/EVENT_NOT_ALLOWED',
+    message: 'Events can only be registered when the match is IN_PROGRESS or FINISHED',
+    statusCode: 422,
+  },
+  matchMvpRequiresFinished: {
+    code: 'MATCH/MVP_REQUIRES_FINISHED',
+    message: 'Match MVP can only be defined when the match is FINISHED',
+    statusCode: 422,
+  },
+  playerNotInMatch: {
+    code: 'PLAYER/NOT_IN_MATCH',
+    message: 'Player does not belong to either team in this match',
+    statusCode: 422,
+  },
+  championshipRulesInvalid: {
+    code: 'CHAMPIONSHIP/RULES_INVALID',
+    message: 'Championship rules contain invalid values',
+    statusCode: 422,
+  },
+  tieBreakerRulesInvalid: {
+    code: 'CHAMPIONSHIP/TIE_BREAKER_RULES_INVALID',
+    message: 'Tie breaker rules are invalid',
+    statusCode: 422,
+  },
+  tieBreakerDuplicatePosition: {
+    code: 'CHAMPIONSHIP/TIE_BREAKER_DUPLICATE_POSITION',
+    message: 'Tie breaker rule positions must be unique and sequential starting at 1',
+    statusCode: 422,
+  },
+  standingGroupStageOnly: {
+    code: 'STANDING/GROUP_STAGE_ONLY',
+    message: 'Standings are only available for GROUP_STAGE phases',
+    statusCode: 422,
+  },
 } as const satisfies Record<string, AppError>;

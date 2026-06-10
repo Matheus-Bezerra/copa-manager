@@ -10,10 +10,15 @@ import {
   validatorCompiler,
 } from '@/config/swagger.config';
 import { authRoutes } from '@/http/routes/auth.routes';
+import { championshipRulesRoutes } from '@/http/routes/championship-rules.routes';
 import { championshipMemberRoutes } from '@/http/routes/championship-member.routes';
 import { championshipRoutes } from '@/http/routes/championship.routes';
 import { playerRoutes } from '@/http/routes/player.routes';
 import { publicRoutes } from '@/http/routes/public.routes';
+import { matchEventRoutes } from '@/http/routes/match-event.routes';
+import { matchRoutes } from '@/http/routes/match.routes';
+import { standingsRoutes } from '@/http/routes/standings.routes';
+import { stageRoutes } from '@/http/routes/stage.routes';
 import { teamRoutes } from '@/http/routes/team.routes';
 import { userRoutes } from '@/http/routes/user.routes';
 import { healthSchema } from '@/http/schemas/health.schema';
@@ -41,9 +46,14 @@ export async function buildApp() {
       await api.register(authRoutes);
       await api.register(userRoutes);
       await api.register(championshipRoutes);
+      await api.register(championshipRulesRoutes);
       await api.register(championshipMemberRoutes);
       await api.register(teamRoutes);
       await api.register(playerRoutes);
+      await api.register(stageRoutes);
+      await api.register(matchRoutes);
+      await api.register(matchEventRoutes);
+      await api.register(standingsRoutes);
       await api.register(publicRoutes);
     },
     { prefix: '/api/v1' }

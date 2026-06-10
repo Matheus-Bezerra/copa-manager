@@ -147,6 +147,7 @@ model Championship {
   standings   Standing[]
   awards      Award[]
   rules       ChampionshipRules?
+  tieBreakerRules TieBreakerRule[]
 
   @@index([slug])
   @@index([ownerUserId])
@@ -419,7 +420,6 @@ model ChampionshipRules {
   updatedAt                DateTime @updatedAt @map("updated_at")
 
   championship   Championship    @relation(fields: [championshipId], references: [id], onDelete: Cascade)
-  tieBreakerRules TieBreakerRule[]
 
   @@map("championship_rules")
 }
@@ -430,7 +430,7 @@ model TieBreakerRule {
   position       Int
   criterion      String
 
-  rules ChampionshipRules @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
 
   @@unique([championshipId, position])
   @@index([championshipId])

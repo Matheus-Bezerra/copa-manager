@@ -4,6 +4,7 @@ import type {
   ListMatchesFilters,
   Match,
   MatchRepository,
+  MatchWithResult,
   UpdateMatchInput,
 } from '@/repositories/match-repository'
 
@@ -27,8 +28,43 @@ export class PrismaMatchRepository implements MatchRepository {
   async findByRoundId(roundId: string): Promise<Match[]> {
     return prisma.match.findMany({
       where: { roundId },
-      orderBy: { scheduledAt: 'asc' },
+      orderBy: { createdAt: 'asc' },
     })
+  }
+
+  async findByStageId(stageId: string): Promise<Match[]> {
+    return prisma.match.findMany({
+      where: { round: { stageId } },
+      orderBy: [{ round: { number: 'asc' } }, { createdAt: 'asc' }],
+    })
+  }
+
+  async findFinishedWithResultsByGroupId(groupId: string): Promise<MatchWithResult[]> {
+    const matches = await prisma.match.findMany({
+      where: { groupId, status: 'FINISHED', result: { isNot: null } },
+      include: { result: true },
+    })
+
+    return matches
+      .filter((match) => match.result !== null)
+      .map((match) => ({
+        id: match.id,
+        championshipId: match.championshipId,
+        roundId: match.roundId,
+        groupId: match.groupId,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
+        scheduledAt: match.scheduledAt,
+        status: match.status,
+        createdAt: match.createdAt,
+        updatedAt: match.updatedAt,
+        result: {
+          homeScore: match.result!.homeScore,
+          awayScore: match.result!.awayScore,
+          homePenaltyScore: match.result!.homePenaltyScore,
+          awayPenaltyScore: match.result!.awayPenaltyScore,
+        },
+      }))
   }
 
   async create(data: CreateMatchInput): Promise<Match> {
