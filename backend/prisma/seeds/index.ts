@@ -24,9 +24,9 @@ async function seed() {
   console.log('  Organizer:  organizer@copamanager.test');
   console.log('');
   console.log('Championship slug (public):', SEED_CHAMPIONSHIP.slug);
-  console.log('  GET /api/v1/public/championships/' + SEED_CHAMPIONSHIP.slug);
-  console.log('  GET /api/v1/public/championships/' + SEED_CHAMPIONSHIP.slug + '/structure');
-  console.log('  GET /api/v1/public/championships/' + SEED_CHAMPIONSHIP.slug + '/matches');
+  console.log('  GET /public/championships/' + SEED_CHAMPIONSHIP.slug);
+  console.log('  GET /public/championships/' + SEED_CHAMPIONSHIP.slug + '/structure');
+  console.log('  GET /public/championships/' + SEED_CHAMPIONSHIP.slug + '/matches');
 }
 
 seed()

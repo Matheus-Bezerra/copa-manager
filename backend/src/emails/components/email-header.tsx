@@ -7,8 +7,13 @@ export function EmailHeader() {
       <Img
         src={`cid:${EMAIL_LOGO_FULL_CID}`}
         alt="Copa Manager — Organize. Compita. Celebre."
-        width={320}
-        className="mx-auto"
+        width={140}
+        style={{
+          display: 'block',
+          margin: '0 auto',
+          maxWidth: '140px',
+          height: 'auto',
+        }}
       />
     </Section>
   );
