@@ -222,7 +222,7 @@ import type {
 } from '../../types/auth/sign-in-with-password'
 
 export const signInWithPasswordMutationKey = () =>
-  [{ url: '/api/v1/sessions/password' }] as const
+  [{ url: '/sessions/password' }] as const
 
 export type SignInWithPasswordMutationKey = ReturnType<
   typeof signInWithPasswordMutationKey
@@ -242,7 +242,7 @@ export async function signInWithPassword(
     SignInWithPasswordBody
   >({
     method: 'POST',
-    url: '/api/v1/sessions/password',
+    url: '/sessions/password',
     data,
     ...requestConfig,
   })
@@ -322,7 +322,7 @@ import type {
 } from '../../types/teams/fetch-teams'
 
 export const fetchTeamsQueryKey = (params?: FetchTeamsQueryParams) =>
-  [{ url: '/api/v1/teams' }, ...(params ? [params] : [])] as const
+  [{ url: '/teams' }, ...(params ? [params] : [])] as const
 
 export type FetchTeamsQueryKey = ReturnType<typeof fetchTeamsQueryKey>
 
@@ -338,7 +338,7 @@ export async function fetchTeams(
     unknown
   >({
     method: 'GET',
-    url: '/api/v1/teams',
+    url: '/teams',
     params,
     ...requestConfig,
   })
@@ -831,7 +831,7 @@ O frontend usa **ESLint + Prettier**. Não utilizar Biome.
 **Dependências de dev sugeridas:**
 
 ```bash
-pnpm add -D eslint prettier eslint-config-prettier \
+npm add -D eslint prettier eslint-config-prettier \
   @eslint/js typescript-eslint \
   eslint-plugin-react-hooks eslint-plugin-react-refresh \
   globals
@@ -902,18 +902,18 @@ export default tseslint.config(
 **pre-commit:**
 
 1. `lint-staged` — ESLint + Prettier nos arquivos alterados
-2. `pnpm run build` — garante que compila
+2. `npm run build` — garante que compila
 
 ---
 
 ## Padronização de código
 
 ```bash
-pnpm dev           # Servidor de desenvolvimento
-pnpm build         # Build de produção
-pnpm lint          # Verificação ESLint
-pnpm lint:fix      # Correções automáticas ESLint
-pnpm format        # Formatação Prettier
+npm dev           # Servidor de desenvolvimento
+npm build         # Build de produção
+npm lint          # Verificação ESLint
+npm lint:fix      # Correções automáticas ESLint
+npm format        # Formatação Prettier
 ```
 
 **Imports — ordem manual:**
@@ -940,19 +940,19 @@ pnpm format        # Formatação Prettier
 ### 1. Scaffold
 
 ```bash
-pnpm create vite@latest meu-painel --template react-ts
+npm create vite@latest meu-painel --template react-ts
 cd meu-painel
-pnpm install
+npm install
 ```
 
 ### 2. Dependências principais
 
 ```bash
-pnpm add @tanstack/react-router @tanstack/react-query axios zod \
+npm add @tanstack/react-router @tanstack/react-query axios zod \
   @hookform/resolvers react-hook-form zustand nuqs sonner \
   clsx tailwind-merge class-variance-authority lucide-react
 
-pnpm add -D @tanstack/router-plugin @vitejs/plugin-react \
+npm add -D @tanstack/router-plugin @vitejs/plugin-react \
   @tailwindcss/vite tailwindcss typescript \
   eslint prettier eslint-config-prettier @eslint/js typescript-eslint \
   eslint-plugin-react-hooks eslint-plugin-react-refresh globals \
@@ -980,8 +980,8 @@ Copie/adapte deste repositório de referência (brindefly-panel-admin):
 ### 5. Husky
 
 ```bash
-pnpm exec husky init
-# .husky/pre-commit → npx lint-staged && pnpm run build
+npm exec husky init
+# .husky/pre-commit → npx lint-staged && npm run build
 ```
 
 ### 6. Primeiro endpoint
@@ -993,11 +993,11 @@ Implemente login manualmente (`use-sign-in-with-password.ts`) e valide o fluxo a
 ## Comandos úteis
 
 ```bash
-pnpm dev                              # Dev server (porta 5173)
-pnpm build                            # Build em /build
-pnpm lint                             # ESLint
-pnpm lint:fix                         # ESLint com fix
-pnpm format                           # Prettier
+npm dev                              # Dev server (porta 5173)
+npm build                            # Build em /build
+npm lint                             # ESLint
+npm lint:fix                         # ESLint com fix
+npm format                           # Prettier
 npx shadcn@latest add <component>     # Componente UI
 ```
 
