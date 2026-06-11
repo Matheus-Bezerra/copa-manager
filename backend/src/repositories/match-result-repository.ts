@@ -19,6 +19,7 @@ export interface UpsertMatchResultInput {
 
 export interface MatchResultRepository {
   findByMatchId(matchId: string): Promise<MatchResult | null>
+  findByMatchIds(matchIds: string[]): Promise<MatchResult[]>
   upsert(data: UpsertMatchResultInput): Promise<MatchResult>
   deleteByMatchId(matchId: string): Promise<void>
 }

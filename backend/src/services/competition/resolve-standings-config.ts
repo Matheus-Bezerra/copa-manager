@@ -16,6 +16,7 @@ export const DEFAULT_CHAMPIONSHIP_RULES = {
   penaltyBonusPoints: 0,
   yellowCardsForSuspension: 3,
   redCardSuspensionGames: 1,
+  matchDuration: 90,
 } as const
 
 export const DEFAULT_TIE_BREAKER_RULE_DEFINITIONS = [
@@ -57,6 +58,7 @@ export function toChampionshipRulesResponse(rules: ChampionshipRules | null) {
       rules?.yellowCardsForSuspension ?? DEFAULT_CHAMPIONSHIP_RULES.yellowCardsForSuspension,
     redCardSuspensionGames:
       rules?.redCardSuspensionGames ?? DEFAULT_CHAMPIONSHIP_RULES.redCardSuspensionGames,
+    matchDuration: rules?.matchDuration ?? DEFAULT_CHAMPIONSHIP_RULES.matchDuration,
     createdAt: rules?.createdAt ?? null,
     updatedAt: rules?.updatedAt ?? null,
   }

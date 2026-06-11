@@ -6,6 +6,7 @@ export interface ChampionshipRules {
   penaltyBonusPoints: number
   yellowCardsForSuspension: number
   redCardSuspensionGames: number
+  matchDuration: number
   createdAt: Date
   updatedAt: Date
 }
@@ -18,6 +19,7 @@ export interface UpsertChampionshipRulesInput {
   penaltyBonusPoints?: number
   yellowCardsForSuspension?: number
   redCardSuspensionGames?: number
+  matchDuration?: number
 }
 
 export interface UpdateChampionshipRulesInput {
@@ -26,6 +28,7 @@ export interface UpdateChampionshipRulesInput {
   penaltyBonusPoints?: number
   yellowCardsForSuspension?: number
   redCardSuspensionGames?: number
+  matchDuration?: number
 }
 
 export interface ChampionshipRulesRepository {

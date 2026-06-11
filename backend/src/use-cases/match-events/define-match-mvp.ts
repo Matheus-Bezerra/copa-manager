@@ -1,5 +1,6 @@
 import { ulid } from 'ulidx'
 import { errorMessage } from '@/constants/error-message'
+import type { AwardRepository } from '@/repositories/award-repository'
 import type { MatchEvent, MatchEventRepository } from '@/repositories/match-event-repository'
 import type { MatchRepository } from '@/repositories/match-repository'
 import type { PlayerRepository } from '@/repositories/player-repository'
@@ -25,6 +26,7 @@ export class DefineMatchMvpUseCase {
     private readonly playerRepository: PlayerRepository,
     private readonly matchEventRepository: MatchEventRepository,
     private readonly playerStatisticsRepository: PlayerStatisticsRepository,
+    private readonly awardRepository: AwardRepository,
   ) {}
 
   async execute(request: DefineMatchMvpUseCaseRequest): Promise<{ event: MatchEvent }> {
@@ -75,6 +77,23 @@ export class DefineMatchMvpUseCase {
       request.playerId,
       'MVP',
     )
+
+    const existingMatchMvpAward = await this.awardRepository.findByMatchIdAndAwardType(
+      request.matchId,
+      'MATCH_MVP',
+    )
+
+    if (existingMatchMvpAward) {
+      await this.awardRepository.delete(existingMatchMvpAward.id)
+    }
+
+    await this.awardRepository.create({
+      id: ulid(),
+      championshipId: request.championshipId,
+      playerId: request.playerId,
+      matchId: request.matchId,
+      awardType: 'MATCH_MVP',
+    })
 
     return { event }
   }

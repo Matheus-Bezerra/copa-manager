@@ -9,6 +9,7 @@ export const championshipRulesSchema = z.object({
   penaltyBonusPoints: z.number().int(),
   yellowCardsForSuspension: z.number().int(),
   redCardSuspensionGames: z.number().int(),
+  matchDuration: z.number().int(),
   createdAt: z.coerce.date().nullable(),
   updatedAt: z.coerce.date().nullable(),
 })
@@ -55,6 +56,7 @@ export const updateChampionshipRulesSchema = {
     penaltyBonusPoints: z.number().int().min(0).optional(),
     yellowCardsForSuspension: z.number().int().min(1).optional(),
     redCardSuspensionGames: z.number().int().min(0).optional(),
+    matchDuration: z.number().int().min(1).optional(),
   }),
   response: expandErrorResponses(
     { 200: updateChampionshipRulesResponseSchema },

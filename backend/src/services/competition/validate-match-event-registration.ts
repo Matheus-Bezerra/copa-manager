@@ -42,3 +42,13 @@ export function assertPlayerBelongsToMatch(match: Match, player: Player): void {
     throw errorMessage.playerNotInMatch
   }
 }
+
+export function assertTeamBelongsToMatch(match: Match, teamId: string): void {
+  if (!match.homeTeamId || !match.awayTeamId) {
+    throw errorMessage.matchTeamsRequired
+  }
+
+  if (teamId !== match.homeTeamId && teamId !== match.awayTeamId) {
+    throw errorMessage.teamNotInMatch
+  }
+}

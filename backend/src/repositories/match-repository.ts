@@ -8,6 +8,7 @@ export interface Match {
   homeTeamId: string | null
   awayTeamId: string | null
   scheduledAt: Date | null
+  startedAt: Date | null
   status: MatchStatus
   createdAt: Date
   updatedAt: Date
@@ -21,6 +22,7 @@ export interface CreateMatchInput {
   homeTeamId?: string | null
   awayTeamId?: string | null
   scheduledAt?: Date | null
+  startedAt?: Date | null
   status?: MatchStatus
 }
 
@@ -28,6 +30,7 @@ export interface UpdateMatchInput {
   homeTeamId?: string | null
   awayTeamId?: string | null
   scheduledAt?: Date | null
+  startedAt?: Date | null
   status?: MatchStatus
 }
 
@@ -54,6 +57,7 @@ export interface MatchRepository {
   findByRoundId(roundId: string): Promise<Match[]>
   findByStageId(stageId: string): Promise<Match[]>
   findFinishedWithResultsByGroupId(groupId: string): Promise<MatchWithResult[]>
+  findTeamIdsByGroupId(groupId: string): Promise<string[]>
   create(data: CreateMatchInput): Promise<Match>
   update(id: string, data: UpdateMatchInput): Promise<Match>
   delete(id: string): Promise<void>

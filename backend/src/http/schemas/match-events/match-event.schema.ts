@@ -25,6 +25,16 @@ export const scoringEventBodySchema = z.object({
   minute: z.number().int().min(0).max(200).optional().nullable(),
 })
 
+export const goalEventBodySchema = z
+  .object({
+    playerId: z.string().min(1).optional(),
+    teamId: z.string().min(1).optional(),
+    minute: z.number().int().min(0).max(200).optional().nullable(),
+  })
+  .refine((data) => Boolean(data.playerId || data.teamId), {
+    message: 'Informe o jogador ou o time',
+  })
+
 export const defineMatchMvpBodySchema = z.object({
   playerId: z.string().min(1),
 })
@@ -48,7 +58,7 @@ export const registerGoalSchema = {
   operationId: 'registerGoal',
   security: [{ bearerAuth: [] }],
   params: matchEventParamsSchema,
-  body: scoringEventBodySchema,
+  body: goalEventBodySchema,
   response: scoringEventResponses,
 }
 
@@ -93,4 +103,5 @@ export const defineMatchMvpSchema = {
 
 export type MatchEventParams = z.infer<typeof matchEventParamsSchema>
 export type ScoringEventBody = z.infer<typeof scoringEventBodySchema>
+export type GoalEventBody = z.infer<typeof goalEventBodySchema>
 export type DefineMatchMvpBody = z.infer<typeof defineMatchMvpBodySchema>

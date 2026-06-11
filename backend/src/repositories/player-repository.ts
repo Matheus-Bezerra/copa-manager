@@ -48,6 +48,7 @@ export interface UpdatePlayerInput {
 export interface PlayerRepository {
   findById(id: string): Promise<Player | null>;
   findByChampionshipId(championshipId: string): Promise<Player[]>;
+  findByTeamIds(teamIds: string[]): Promise<Player[]>;
   create(data: CreatePlayerInput): Promise<Player>;
   update(id: string, data: UpdatePlayerInput): Promise<Player>;
   delete(id: string): Promise<void>;

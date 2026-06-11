@@ -1,7 +1,7 @@
 import { z } from '@/lib/zod'
 import { expandErrorResponses } from '@/utils/errors/expand-error-responses'
 import { errorSchema } from '../common.schema'
-import { matchSchema, matchStatusSchema } from '../matches/match.schema'
+import { matchListItemSchema, matchStatusSchema } from '../matches/match.schema'
 import { standingEntrySchema } from '../standings/standing.schema'
 import { stageWithStructureSchema } from '../stages/stage.schema'
 
@@ -46,7 +46,7 @@ export const listPublicMatchesSchema = {
     status: matchStatusSchema.optional(),
   }),
   response: expandErrorResponses(
-    { 200: z.object({ data: z.array(matchSchema) }) },
+    { 200: z.object({ data: z.array(matchListItemSchema) }) },
     { '4xx': errorSchema, '5xx': errorSchema },
   ),
 }

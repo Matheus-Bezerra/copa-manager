@@ -207,7 +207,7 @@ export const errorMessage = {
   },
   matchTeamsRequired: {
     code: 'MATCH/TEAMS_REQUIRED',
-    message: 'Both home and away teams must be set to register a result',
+    message: 'Both home and away teams must be defined',
     statusCode: 422,
   },
   matchInvalidScore: {
@@ -233,6 +233,21 @@ export const errorMessage = {
   playerNotInMatch: {
     code: 'PLAYER/NOT_IN_MATCH',
     message: 'Player does not belong to either team in this match',
+    statusCode: 422,
+  },
+  teamNotInMatch: {
+    code: 'TEAM/NOT_IN_MATCH',
+    message: 'Team does not belong to this match',
+    statusCode: 422,
+  },
+  goalRequiresPlayerOrTeam: {
+    code: 'MATCH/GOAL_REQUIRES_PLAYER_OR_TEAM',
+    message: 'Goal must reference a player or a team',
+    statusCode: 422,
+  },
+  matchEventRequiresPlayer: {
+    code: 'MATCH/EVENT_REQUIRES_PLAYER',
+    message: 'This event type requires a player',
     statusCode: 422,
   },
   championshipRulesInvalid: {

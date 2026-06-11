@@ -1,9 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { GetStandingsParams, GetStandingsQuery } from '@/http/schemas/standings/get-standings.schema'
 import { PrismaChampionshipRepository } from '@/prisma/repositories/prisma-championship-repository'
+import { PrismaChampionshipRulesRepository } from '@/prisma/repositories/prisma-championship-rules-repository'
 import { PrismaGroupRepository } from '@/prisma/repositories/prisma-group-repository'
+import { PrismaMatchRepository } from '@/prisma/repositories/prisma-match-repository'
 import { PrismaStageRepository } from '@/prisma/repositories/prisma-stage-repository'
 import { PrismaStandingRepository } from '@/prisma/repositories/prisma-standing-repository'
+import { PrismaTieBreakerRuleRepository } from '@/prisma/repositories/prisma-tie-breaker-rule-repository'
 import { GetStandingsUseCase } from '@/use-cases/standings/get-standings'
 import { formatError } from '@/utils/errors/format-error'
 import { logger } from '@/utils/logger'
@@ -19,7 +22,10 @@ export async function getStandingsController(request: FastifyRequest, reply: Fas
       new PrismaChampionshipRepository(),
       new PrismaStageRepository(),
       new PrismaGroupRepository(),
+      new PrismaMatchRepository(),
       new PrismaStandingRepository(),
+      new PrismaChampionshipRulesRepository(),
+      new PrismaTieBreakerRuleRepository(),
     )
 
     const { standings } = await useCase.execute({ championshipId, stageId, groupId })

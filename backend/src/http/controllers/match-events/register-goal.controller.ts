@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import type { MatchEventParams, ScoringEventBody } from '@/http/schemas/match-events/match-event.schema'
+import type { GoalEventBody, MatchEventParams } from '@/http/schemas/match-events/match-event.schema'
 import { PrismaMatchEventRepository } from '@/prisma/repositories/prisma-match-event-repository'
 import { PrismaMatchRepository } from '@/prisma/repositories/prisma-match-repository'
 import { PrismaPlayerRepository } from '@/prisma/repositories/prisma-player-repository'
@@ -11,7 +11,7 @@ import { logger } from '@/utils/logger'
 
 export async function registerGoalController(request: FastifyRequest, reply: FastifyReply) {
   const { championshipId, matchId } = request.params as MatchEventParams
-  const { playerId, minute } = request.body as ScoringEventBody
+  const { playerId, teamId, minute } = request.body as GoalEventBody
 
   try {
     const { userId } = await request.verifyUserAvailability()
@@ -29,7 +29,7 @@ export async function registerGoalController(request: FastifyRequest, reply: Fas
       new PrismaPlayerStatisticsRepository(),
     )
 
-    const { event } = await useCase.execute({ championshipId, matchId, playerId, minute })
+    const { event } = await useCase.execute({ championshipId, matchId, playerId, teamId, minute })
 
     return reply.status(201).send({ data: { event } })
   } catch (err) {

@@ -7,7 +7,8 @@ import { registerScoringEvent } from '@/use-cases/match-events/register-scoring-
 export interface RegisterGoalUseCaseRequest {
   championshipId: string
   matchId: string
-  playerId: string
+  playerId?: string | null
+  teamId?: string | null
   minute?: number | null
 }
 

@@ -3,6 +3,7 @@ import type {
   DefineMatchMvpBody,
   MatchEventParams,
 } from '@/http/schemas/match-events/match-event.schema'
+import { PrismaAwardRepository } from '@/prisma/repositories/prisma-award-repository'
 import { PrismaMatchEventRepository } from '@/prisma/repositories/prisma-match-event-repository'
 import { PrismaMatchRepository } from '@/prisma/repositories/prisma-match-repository'
 import { PrismaPlayerRepository } from '@/prisma/repositories/prisma-player-repository'
@@ -30,6 +31,7 @@ export async function defineMatchMvpController(request: FastifyRequest, reply: F
       new PrismaPlayerRepository(),
       new PrismaMatchEventRepository(),
       new PrismaPlayerStatisticsRepository(),
+      new PrismaAwardRepository(),
     )
 
     const { event } = await useCase.execute({ championshipId, matchId, playerId })

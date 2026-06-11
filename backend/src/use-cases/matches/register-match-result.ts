@@ -11,6 +11,10 @@ import type { GroupRepository } from '@/repositories/group-repository'
 import type { StandingRepository } from '@/repositories/standing-repository'
 import type { TieBreakerRuleRepository } from '@/repositories/tie-breaker-rule-repository'
 import type { MatchBracketLinkRepository } from '@/repositories/match-bracket-link-repository'
+import type { MatchEventRepository } from '@/repositories/match-event-repository'
+import type { PlayerRepository } from '@/repositories/player-repository'
+import type { PlayerStatisticsRepository } from '@/repositories/player-statistics-repository'
+import { incrementMatchesPlayedOnMatchFinished } from '@/services/competition/increment-matches-played-on-match-finished'
 import { ProcessMatchFinishedUseCase } from '@/use-cases/matches/process-match-finished'
 
 export interface RegisterMatchResultUseCaseRequest {
@@ -34,6 +38,9 @@ export class RegisterMatchResultUseCase {
     private readonly championshipRulesRepository: ChampionshipRulesRepository,
     private readonly tieBreakerRuleRepository: TieBreakerRuleRepository,
     private readonly matchBracketLinkRepository: MatchBracketLinkRepository,
+    private readonly matchEventRepository: MatchEventRepository,
+    private readonly playerRepository: PlayerRepository,
+    private readonly playerStatisticsRepository: PlayerStatisticsRepository,
   ) {}
 
   async execute(
@@ -74,7 +81,18 @@ export class RegisterMatchResultUseCase {
       awayPenaltyScore: request.awayPenaltyScore ?? null,
     })
 
+    const isFirstFinish = match.status !== 'FINISHED'
+
     const updatedMatch = await this.matchRepository.update(request.matchId, { status: 'FINISHED' })
+
+    if (isFirstFinish) {
+      await incrementMatchesPlayedOnMatchFinished(
+        updatedMatch,
+        this.matchEventRepository,
+        this.playerRepository,
+        this.playerStatisticsRepository,
+      )
+    }
 
     const round = await this.roundRepository.findById(match.roundId)
     const stage = round ? await this.stageRepository.findById(round.stageId) : null

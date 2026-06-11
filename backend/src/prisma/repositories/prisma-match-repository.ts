@@ -39,6 +39,27 @@ export class PrismaMatchRepository implements MatchRepository {
     })
   }
 
+  async findTeamIdsByGroupId(groupId: string): Promise<string[]> {
+    const matches = await prisma.match.findMany({
+      where: { groupId, status: { not: 'CANCELLED' } },
+      select: { homeTeamId: true, awayTeamId: true },
+    })
+
+    const teamIds = new Set<string>()
+
+    for (const match of matches) {
+      if (match.homeTeamId) {
+        teamIds.add(match.homeTeamId)
+      }
+
+      if (match.awayTeamId) {
+        teamIds.add(match.awayTeamId)
+      }
+    }
+
+    return Array.from(teamIds)
+  }
+
   async findFinishedWithResultsByGroupId(groupId: string): Promise<MatchWithResult[]> {
     const matches = await prisma.match.findMany({
       where: { groupId, status: 'FINISHED', result: { isNot: null } },
@@ -55,6 +76,7 @@ export class PrismaMatchRepository implements MatchRepository {
         homeTeamId: match.homeTeamId,
         awayTeamId: match.awayTeamId,
         scheduledAt: match.scheduledAt,
+        startedAt: match.startedAt,
         status: match.status,
         createdAt: match.createdAt,
         updatedAt: match.updatedAt,

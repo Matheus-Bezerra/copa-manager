@@ -1,11 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { CreateMatchBody, CreateMatchParams } from '@/http/schemas/matches/create-match.schema'
 import { PrismaChampionshipRepository } from '@/prisma/repositories/prisma-championship-repository'
+import { PrismaChampionshipRulesRepository } from '@/prisma/repositories/prisma-championship-rules-repository'
 import { PrismaGroupRepository } from '@/prisma/repositories/prisma-group-repository'
 import { PrismaMatchRepository } from '@/prisma/repositories/prisma-match-repository'
 import { PrismaRoundRepository } from '@/prisma/repositories/prisma-round-repository'
 import { PrismaStageRepository } from '@/prisma/repositories/prisma-stage-repository'
+import { PrismaStandingRepository } from '@/prisma/repositories/prisma-standing-repository'
 import { PrismaTeamRepository } from '@/prisma/repositories/prisma-team-repository'
+import { PrismaTieBreakerRuleRepository } from '@/prisma/repositories/prisma-tie-breaker-rule-repository'
 import { prismaChampionshipService } from '@/services/championship/prisma-championship-access-service'
 import { CreateMatchUseCase } from '@/use-cases/matches/create-match'
 import { formatError } from '@/utils/errors/format-error'
@@ -31,6 +34,9 @@ export async function createMatchController(request: FastifyRequest, reply: Fast
       new PrismaGroupRepository(),
       new PrismaTeamRepository(),
       new PrismaMatchRepository(),
+      new PrismaStandingRepository(),
+      new PrismaChampionshipRulesRepository(),
+      new PrismaTieBreakerRuleRepository(),
     )
 
     const { match } = await useCase.execute({ championshipId, ...body })

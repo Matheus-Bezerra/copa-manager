@@ -1,10 +1,10 @@
 import { z } from '@/lib/zod'
 import { expandErrorResponses } from '@/utils/errors/expand-error-responses'
 import { errorSchema } from '../common.schema'
-import { championshipIdParamsSchema, matchSchema, matchStatusSchema } from './match.schema'
+import { championshipIdParamsSchema, matchListItemSchema, matchStatusSchema } from './match.schema'
 
 const listMatchesResponseSchema = z.object({
-  data: z.array(matchSchema),
+  data: z.array(matchListItemSchema),
 })
 
 export const listMatchesSchema = {

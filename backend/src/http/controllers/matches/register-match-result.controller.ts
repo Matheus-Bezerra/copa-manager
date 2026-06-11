@@ -9,6 +9,9 @@ import { PrismaGroupRepository } from '@/prisma/repositories/prisma-group-reposi
 import { PrismaMatchRepository } from '@/prisma/repositories/prisma-match-repository'
 import { PrismaMatchResultRepository } from '@/prisma/repositories/prisma-match-result-repository'
 import { PrismaMatchBracketLinkRepository } from '@/prisma/repositories/prisma-match-bracket-link-repository'
+import { PrismaMatchEventRepository } from '@/prisma/repositories/prisma-match-event-repository'
+import { PrismaPlayerRepository } from '@/prisma/repositories/prisma-player-repository'
+import { PrismaPlayerStatisticsRepository } from '@/prisma/repositories/prisma-player-statistics-repository'
 import { PrismaRoundRepository } from '@/prisma/repositories/prisma-round-repository'
 import { PrismaStageRepository } from '@/prisma/repositories/prisma-stage-repository'
 import { PrismaStandingRepository } from '@/prisma/repositories/prisma-standing-repository'
@@ -42,6 +45,9 @@ export async function registerMatchResultController(request: FastifyRequest, rep
       new PrismaChampionshipRulesRepository(),
       new PrismaTieBreakerRuleRepository(),
       new PrismaMatchBracketLinkRepository(),
+      new PrismaMatchEventRepository(),
+      new PrismaPlayerRepository(),
+      new PrismaPlayerStatisticsRepository(),
     )
 
     const { match, result } = await useCase.execute({

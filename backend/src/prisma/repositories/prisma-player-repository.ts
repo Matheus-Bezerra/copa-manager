@@ -31,6 +31,20 @@ export class PrismaPlayerRepository implements PlayerRepository {
     });
   }
 
+  async findByTeamIds(teamIds: string[]): Promise<Player[]> {
+    if (teamIds.length === 0) {
+      return [];
+    }
+
+    return prisma.player.findMany({
+      where: {
+        teamId: { in: teamIds },
+      },
+      include: playerInclude,
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async create(data: CreatePlayerInput): Promise<Player> {
     const statisticsId = ulid();
 

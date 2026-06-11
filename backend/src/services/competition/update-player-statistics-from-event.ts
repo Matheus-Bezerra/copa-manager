@@ -13,17 +13,30 @@ const EVENT_STAT_INCREMENT: Record<
   RED_CARD: { redCards: 1 },
 }
 
+interface IncrementPlayerStatisticsFromEventOptions {
+  countMatchPlayed?: boolean
+}
+
 export async function incrementPlayerStatisticsFromEvent(
   playerStatisticsRepository: PlayerStatisticsRepository,
   playerId: string,
   eventType: MatchEventType,
+  options?: IncrementPlayerStatisticsFromEventOptions,
 ): Promise<void> {
+  const matchesPlayedIncrement = options?.countMatchPlayed ? { matchesPlayed: 1 } : {}
+
   if (eventType === 'MVP') {
-    await playerStatisticsRepository.increment(playerId, { matchMvps: 1 })
+    await playerStatisticsRepository.increment(playerId, {
+      matchMvps: 1,
+      ...matchesPlayedIncrement,
+    })
     return
   }
 
-  await playerStatisticsRepository.increment(playerId, EVENT_STAT_INCREMENT[eventType])
+  await playerStatisticsRepository.increment(playerId, {
+    ...EVENT_STAT_INCREMENT[eventType],
+    ...matchesPlayedIncrement,
+  })
 }
 
 export async function decrementPlayerStatisticsFromEvent(

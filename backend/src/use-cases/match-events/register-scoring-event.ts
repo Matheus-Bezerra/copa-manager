@@ -8,12 +8,14 @@ import { incrementPlayerStatisticsFromEvent } from '@/services/competition/updat
 import {
   assertMatchAllowsEventRegistration,
   assertPlayerBelongsToMatch,
+  assertTeamBelongsToMatch,
 } from '@/services/competition/validate-match-event-registration'
 
 export interface RegisterScoringEventRequest {
   championshipId: string
   matchId: string
-  playerId: string
+  playerId?: string | null
+  teamId?: string | null
   minute?: number | null
   eventType: Exclude<MatchEventType, 'MVP'>
 }
@@ -33,28 +35,60 @@ export async function registerScoringEvent(
 
   assertMatchAllowsEventRegistration(match, 'SCORING')
 
-  const player = await playerRepository.findById(request.playerId)
+  let resolvedPlayerId: string | null = null
+  let resolvedTeamId: string | null = null
 
-  if (!player) {
-    throw errorMessage.playerNotFound
+  if (request.playerId) {
+    const player = await playerRepository.findById(request.playerId)
+
+    if (!player) {
+      throw errorMessage.playerNotFound
+    }
+
+    assertPlayerBelongsToMatch(match, player)
+
+    resolvedPlayerId = request.playerId
+    resolvedTeamId = player.teamId
+  } else if (request.teamId) {
+    if (request.eventType !== 'GOAL') {
+      throw errorMessage.matchEventRequiresPlayer
+    }
+
+    assertTeamBelongsToMatch(match, request.teamId)
+
+    resolvedTeamId = request.teamId
+  } else {
+    throw errorMessage.goalRequiresPlayerOrTeam
   }
 
-  assertPlayerBelongsToMatch(match, player)
+  let countMatchPlayed = false
+
+  if (resolvedPlayerId && match.status !== 'FINISHED') {
+    const hasParticipated = await matchEventRepository.existsByMatchIdAndPlayerId(
+      request.matchId,
+      resolvedPlayerId,
+    )
+
+    countMatchPlayed = !hasParticipated
+  }
 
   const event = await matchEventRepository.create({
     id: ulid(),
     matchId: request.matchId,
-    playerId: request.playerId,
-    teamId: player.teamId,
+    playerId: resolvedPlayerId,
+    teamId: resolvedTeamId,
     eventType: request.eventType,
     minute: request.minute ?? null,
   })
 
-  await incrementPlayerStatisticsFromEvent(
-    playerStatisticsRepository,
-    request.playerId,
-    request.eventType,
-  )
+  if (resolvedPlayerId) {
+    await incrementPlayerStatisticsFromEvent(
+      playerStatisticsRepository,
+      resolvedPlayerId,
+      request.eventType,
+      { countMatchPlayed },
+    )
+  }
 
   return { event }
 }

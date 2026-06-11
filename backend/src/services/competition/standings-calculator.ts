@@ -23,7 +23,7 @@ export const DEFAULT_SCORING_RULES: ScoringRules = {
   penaltyBonusPoints: 0,
 }
 
-function createEmptyStats(teamId: string): TeamStandingStats {
+export function createEmptyStats(teamId: string): TeamStandingStats {
   return {
     teamId,
     points: 0,

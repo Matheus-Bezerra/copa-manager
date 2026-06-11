@@ -21,6 +21,7 @@ export class PrismaChampionshipRulesRepository implements ChampionshipRulesRepos
         penaltyBonusPoints: data.penaltyBonusPoints ?? 0,
         yellowCardsForSuspension: data.yellowCardsForSuspension ?? 3,
         redCardSuspensionGames: data.redCardSuspensionGames ?? 1,
+        matchDuration: data.matchDuration ?? 90,
       },
       update: {
         winPoints: data.winPoints,
@@ -28,6 +29,7 @@ export class PrismaChampionshipRulesRepository implements ChampionshipRulesRepos
         penaltyBonusPoints: data.penaltyBonusPoints,
         yellowCardsForSuspension: data.yellowCardsForSuspension,
         redCardSuspensionGames: data.redCardSuspensionGames,
+        matchDuration: data.matchDuration,
       },
     })
   }

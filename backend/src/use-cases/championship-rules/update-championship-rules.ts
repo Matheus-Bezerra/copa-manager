@@ -11,6 +11,7 @@ export interface UpdateChampionshipRulesUseCaseRequest {
   penaltyBonusPoints?: number
   yellowCardsForSuspension?: number
   redCardSuspensionGames?: number
+  matchDuration?: number
 }
 
 export class UpdateChampionshipRulesUseCase {
@@ -31,7 +32,8 @@ export class UpdateChampionshipRulesUseCase {
       (request.drawPoints !== undefined && request.drawPoints < 0) ||
       (request.penaltyBonusPoints !== undefined && request.penaltyBonusPoints < 0) ||
       (request.yellowCardsForSuspension !== undefined && request.yellowCardsForSuspension < 1) ||
-      (request.redCardSuspensionGames !== undefined && request.redCardSuspensionGames < 0)
+      (request.redCardSuspensionGames !== undefined && request.redCardSuspensionGames < 0) ||
+      (request.matchDuration !== undefined && request.matchDuration < 1)
     ) {
       throw errorMessage.championshipRulesInvalid
     }
@@ -48,6 +50,7 @@ export class UpdateChampionshipRulesUseCase {
       penaltyBonusPoints: request.penaltyBonusPoints,
       yellowCardsForSuspension: request.yellowCardsForSuspension,
       redCardSuspensionGames: request.redCardSuspensionGames,
+      matchDuration: request.matchDuration,
     })
 
     return { rules: toChampionshipRulesResponse(rules) }

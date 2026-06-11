@@ -10,6 +10,16 @@ export class PrismaMatchResultRepository implements MatchResultRepository {
     return prisma.matchResult.findUnique({ where: { matchId } })
   }
 
+  async findByMatchIds(matchIds: string[]): Promise<MatchResult[]> {
+    if (matchIds.length === 0) {
+      return []
+    }
+
+    return prisma.matchResult.findMany({
+      where: { matchId: { in: matchIds } },
+    })
+  }
+
   async upsert(data: UpsertMatchResultInput): Promise<MatchResult> {
     return prisma.matchResult.upsert({
       where: { matchId: data.matchId },

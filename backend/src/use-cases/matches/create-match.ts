@@ -1,11 +1,15 @@
 import { ulid } from 'ulidx'
 import { errorMessage } from '@/constants/error-message'
+import type { ChampionshipRepository } from '@/repositories/championship-repository'
+import type { ChampionshipRulesRepository } from '@/repositories/championship-rules-repository'
 import type { GroupRepository } from '@/repositories/group-repository'
 import type { Match, MatchRepository } from '@/repositories/match-repository'
 import type { RoundRepository } from '@/repositories/round-repository'
 import type { StageRepository } from '@/repositories/stage-repository'
+import type { StandingRepository } from '@/repositories/standing-repository'
 import type { TeamRepository } from '@/repositories/team-repository'
-import type { ChampionshipRepository } from '@/repositories/championship-repository'
+import type { TieBreakerRuleRepository } from '@/repositories/tie-breaker-rule-repository'
+import { RecalculateStandingsUseCase } from '@/use-cases/standings/recalculate-standings'
 
 export interface CreateMatchUseCaseRequest {
   championshipId: string
@@ -24,6 +28,9 @@ export class CreateMatchUseCase {
     private readonly groupRepository: GroupRepository,
     private readonly teamRepository: TeamRepository,
     private readonly matchRepository: MatchRepository,
+    private readonly standingRepository: StandingRepository,
+    private readonly championshipRulesRepository: ChampionshipRulesRepository,
+    private readonly tieBreakerRuleRepository: TieBreakerRuleRepository,
   ) {}
 
   async execute(request: CreateMatchUseCaseRequest): Promise<{ match: Match }> {
@@ -91,6 +98,23 @@ export class CreateMatchUseCase {
       scheduledAt: request.scheduledAt ?? null,
       status: 'SCHEDULED',
     })
+
+    if (match.groupId && stage.type === 'GROUP_STAGE') {
+      const recalculateStandingsUseCase = new RecalculateStandingsUseCase(
+        this.stageRepository,
+        this.groupRepository,
+        this.matchRepository,
+        this.standingRepository,
+        this.championshipRulesRepository,
+        this.tieBreakerRuleRepository,
+      )
+
+      await recalculateStandingsUseCase.syncIfNeeded({
+        championshipId: request.championshipId,
+        stageId: stage.id,
+        groupId: match.groupId,
+      })
+    }
 
     return { match }
   }

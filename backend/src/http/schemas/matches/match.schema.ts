@@ -10,9 +10,15 @@ export const matchSchema = z.object({
   homeTeamId: z.string().nullable(),
   awayTeamId: z.string().nullable(),
   scheduledAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date().nullable(),
   status: matchStatusSchema,
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+})
+
+export const matchListItemSchema = matchSchema.extend({
+  homeScore: z.number().int().nullable(),
+  awayScore: z.number().int().nullable(),
 })
 
 export const matchParamsSchema = z.object({

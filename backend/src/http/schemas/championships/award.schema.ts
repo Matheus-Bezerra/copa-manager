@@ -14,6 +14,7 @@ export const awardSchema = z.object({
   id: z.string(),
   championshipId: z.string(),
   playerId: z.string(),
+  matchId: z.string().nullable(),
   awardType: awardTypeSchema,
   createdAt: z.coerce.date(),
 })

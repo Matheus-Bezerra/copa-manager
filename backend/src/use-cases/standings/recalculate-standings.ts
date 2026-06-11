@@ -8,6 +8,7 @@ import type { Standing, StandingRepository } from '@/repositories/standing-repos
 import type { TieBreakerRuleRepository } from '@/repositories/tie-breaker-rule-repository'
 import {
   calculateTeamStats,
+  createEmptyStats,
 } from '@/services/competition/standings-calculator'
 import {
   assignPositions,
@@ -34,6 +35,26 @@ export class RecalculateStandingsUseCase {
     private readonly tieBreakerRuleRepository: TieBreakerRuleRepository,
   ) {}
 
+  async syncIfNeeded(request: RecalculateStandingsUseCaseRequest): Promise<void> {
+    const teamIds = await this.matchRepository.findTeamIdsByGroupId(request.groupId)
+
+    if (teamIds.length === 0) {
+      return
+    }
+
+    const existingStandings = await this.standingRepository.findByStageAndGroup(
+      request.stageId,
+      request.groupId,
+    )
+
+    const existingTeamIds = new Set(existingStandings.map((standing) => standing.teamId))
+    const needsSync = teamIds.some((teamId) => !existingTeamIds.has(teamId))
+
+    if (needsSync) {
+      await this.execute(request)
+    }
+  }
+
   async execute(request: RecalculateStandingsUseCaseRequest): Promise<{ standings: Standing[] }> {
     const stage = await this.stageRepository.findById(request.stageId)
 
@@ -52,6 +73,7 @@ export class RecalculateStandingsUseCase {
     }
 
     const matches = await this.matchRepository.findFinishedWithResultsByGroupId(request.groupId)
+    const teamIds = await this.matchRepository.findTeamIdsByGroupId(request.groupId)
 
     const rules = await this.championshipRulesRepository.findByChampionshipId(request.championshipId)
     const scoringRules = resolveScoringRules(rules)
@@ -63,6 +85,13 @@ export class RecalculateStandingsUseCase {
     const criteria = resolveTieBreakerCriteria(tieBreakerRules)
 
     const teamStats = calculateTeamStats(matches, scoringRules)
+
+    for (const teamId of teamIds) {
+      if (!teamStats.some((entry) => entry.teamId === teamId)) {
+        teamStats.push(createEmptyStats(teamId))
+      }
+    }
+
     const sortedStats = sortStandings(teamStats, criteria, matches)
     const rankedStats = assignPositions(sortedStats)
 
