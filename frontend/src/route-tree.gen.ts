@@ -9,33 +9,64 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './pages/__root'
-import { Route as AppLayoutRouteImport } from './pages/app/layout'
 import { Route as AuthLayoutRouteImport } from './pages/_auth/layout'
-import { Route as IndexRouteImport } from './pages/index'
-import { Route as AppIndexRouteImport } from './pages/app/index'
+import { Route as AppLayoutRouteImport } from './pages/_app/layout'
+import { Route as AppIndexRouteImport } from './pages/_app/index'
+import { Route as CSlugLayoutRouteImport } from './pages/c/$slug/layout'
+import { Route as InvitationsAcceptIndexRouteImport } from './pages/invitations/accept/index'
+import { Route as CSlugIndexRouteImport } from './pages/c/$slug/index'
 import { Route as AuthSignInIndexRouteImport } from './pages/_auth/sign-in/index'
 import { Route as AuthResetPasswordIndexRouteImport } from './pages/_auth/reset-password/index'
 import { Route as AuthRegisterIndexRouteImport } from './pages/_auth/register/index'
 import { Route as AuthForgotPasswordIndexRouteImport } from './pages/_auth/forgot-password/index'
+import { Route as AppAccountIndexRouteImport } from './pages/_app/account/index'
+import { Route as AppChampionshipsChampionshipIdLayoutRouteImport } from './pages/_app/championships/$championshipId/layout'
+import { Route as CSlugStructureIndexRouteImport } from './pages/c/$slug/structure/index'
+import { Route as CSlugStandingsIndexRouteImport } from './pages/c/$slug/standings/index'
+import { Route as CSlugPlayersIndexRouteImport } from './pages/c/$slug/players/index'
+import { Route as CSlugMatchesIndexRouteImport } from './pages/c/$slug/matches/index'
+import { Route as AppChampionshipsCreateIndexRouteImport } from './pages/_app/championships/create/index'
+import { Route as AppChampionshipsChampionshipIdIndexRouteImport } from './pages/_app/championships/$championshipId/index'
+import { Route as CSlugMatchesMatchIdIndexRouteImport } from './pages/c/$slug/matches/$matchId/index'
+import { Route as AppChampionshipsChampionshipIdStructureIndexRouteImport } from './pages/_app/championships/$championshipId/structure/index'
+import { Route as AppChampionshipsChampionshipIdStandingsIndexRouteImport } from './pages/_app/championships/$championshipId/standings/index'
+import { Route as AppChampionshipsChampionshipIdSettingsIndexRouteImport } from './pages/_app/championships/$championshipId/settings/index'
+import { Route as AppChampionshipsChampionshipIdRulesIndexRouteImport } from './pages/_app/championships/$championshipId/rules/index'
+import { Route as AppChampionshipsChampionshipIdMembersIndexRouteImport } from './pages/_app/championships/$championshipId/members/index'
+import { Route as AppChampionshipsChampionshipIdAwardsIndexRouteImport } from './pages/_app/championships/$championshipId/awards/index'
+import { Route as AppChampionshipsChampionshipIdTeamsteamsIndexRouteImport } from './pages/_app/championships/$championshipId/teams/(teams)/index'
+import { Route as AppChampionshipsChampionshipIdPlayersplayersIndexRouteImport } from './pages/_app/championships/$championshipId/players/(players)/index'
+import { Route as AppChampionshipsChampionshipIdMatchesCreateIndexRouteImport } from './pages/_app/championships/$championshipId/matches/create/index'
+import { Route as AppChampionshipsChampionshipIdMatchesmatchesIndexRouteImport } from './pages/_app/championships/$championshipId/matches/(matches)/index'
+import { Route as AppChampionshipsChampionshipIdMatchesMatchIdIndexRouteImport } from './pages/_app/championships/$championshipId/matches/$matchId/index'
 
-const AppLayoutRoute = AppLayoutRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthLayoutRoute = AuthLayoutRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppLayoutRoute = AppLayoutRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppLayoutRoute,
+} as any)
+const CSlugLayoutRoute = CSlugLayoutRouteImport.update({
+  id: '/c/$slug',
+  path: '/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsAcceptIndexRoute = InvitationsAcceptIndexRouteImport.update({
+  id: '/invitations/accept/',
+  path: '/invitations/accept/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CSlugIndexRoute = CSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CSlugLayoutRoute,
 } as any)
 const AuthSignInIndexRoute = AuthSignInIndexRouteImport.update({
   id: '/sign-in/',
@@ -57,80 +88,315 @@ const AuthForgotPasswordIndexRoute = AuthForgotPasswordIndexRouteImport.update({
   path: '/forgot-password/',
   getParentRoute: () => AuthLayoutRoute,
 } as any)
+const AppAccountIndexRoute = AppAccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => AppLayoutRoute,
+} as any)
+const AppChampionshipsChampionshipIdLayoutRoute =
+  AppChampionshipsChampionshipIdLayoutRouteImport.update({
+    id: '/championships/$championshipId',
+    path: '/championships/$championshipId',
+    getParentRoute: () => AppLayoutRoute,
+  } as any)
+const CSlugStructureIndexRoute = CSlugStructureIndexRouteImport.update({
+  id: '/structure/',
+  path: '/structure/',
+  getParentRoute: () => CSlugLayoutRoute,
+} as any)
+const CSlugStandingsIndexRoute = CSlugStandingsIndexRouteImport.update({
+  id: '/standings/',
+  path: '/standings/',
+  getParentRoute: () => CSlugLayoutRoute,
+} as any)
+const CSlugPlayersIndexRoute = CSlugPlayersIndexRouteImport.update({
+  id: '/players/',
+  path: '/players/',
+  getParentRoute: () => CSlugLayoutRoute,
+} as any)
+const CSlugMatchesIndexRoute = CSlugMatchesIndexRouteImport.update({
+  id: '/matches/',
+  path: '/matches/',
+  getParentRoute: () => CSlugLayoutRoute,
+} as any)
+const AppChampionshipsCreateIndexRoute =
+  AppChampionshipsCreateIndexRouteImport.update({
+    id: '/championships/create/',
+    path: '/championships/create/',
+    getParentRoute: () => AppLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdIndexRoute =
+  AppChampionshipsChampionshipIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const CSlugMatchesMatchIdIndexRoute =
+  CSlugMatchesMatchIdIndexRouteImport.update({
+    id: '/matches/$matchId/',
+    path: '/matches/$matchId/',
+    getParentRoute: () => CSlugLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdStructureIndexRoute =
+  AppChampionshipsChampionshipIdStructureIndexRouteImport.update({
+    id: '/structure/',
+    path: '/structure/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdStandingsIndexRoute =
+  AppChampionshipsChampionshipIdStandingsIndexRouteImport.update({
+    id: '/standings/',
+    path: '/standings/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdSettingsIndexRoute =
+  AppChampionshipsChampionshipIdSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdRulesIndexRoute =
+  AppChampionshipsChampionshipIdRulesIndexRouteImport.update({
+    id: '/rules/',
+    path: '/rules/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdMembersIndexRoute =
+  AppChampionshipsChampionshipIdMembersIndexRouteImport.update({
+    id: '/members/',
+    path: '/members/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdAwardsIndexRoute =
+  AppChampionshipsChampionshipIdAwardsIndexRouteImport.update({
+    id: '/awards/',
+    path: '/awards/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdTeamsteamsIndexRoute =
+  AppChampionshipsChampionshipIdTeamsteamsIndexRouteImport.update({
+    id: '/teams/(teams)/',
+    path: '/teams/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdPlayersplayersIndexRoute =
+  AppChampionshipsChampionshipIdPlayersplayersIndexRouteImport.update({
+    id: '/players/(players)/',
+    path: '/players/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdMatchesCreateIndexRoute =
+  AppChampionshipsChampionshipIdMatchesCreateIndexRouteImport.update({
+    id: '/matches/create/',
+    path: '/matches/create/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdMatchesmatchesIndexRoute =
+  AppChampionshipsChampionshipIdMatchesmatchesIndexRouteImport.update({
+    id: '/matches/(matches)/',
+    path: '/matches/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
+const AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute =
+  AppChampionshipsChampionshipIdMatchesMatchIdIndexRouteImport.update({
+    id: '/matches/$matchId/',
+    path: '/matches/$matchId/',
+    getParentRoute: () => AppChampionshipsChampionshipIdLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/app': typeof AppLayoutRouteWithChildren
-  '/app/': typeof AppIndexRoute
+  '/': typeof AppIndexRoute
+  '/c/$slug': typeof CSlugLayoutRouteWithChildren
+  '/championships/$championshipId': typeof AppChampionshipsChampionshipIdLayoutRouteWithChildren
+  '/account/': typeof AppAccountIndexRoute
   '/forgot-password/': typeof AuthForgotPasswordIndexRoute
   '/register/': typeof AuthRegisterIndexRoute
   '/reset-password/': typeof AuthResetPasswordIndexRoute
   '/sign-in/': typeof AuthSignInIndexRoute
+  '/c/$slug/': typeof CSlugIndexRoute
+  '/invitations/accept/': typeof InvitationsAcceptIndexRoute
+  '/championships/$championshipId/': typeof AppChampionshipsChampionshipIdIndexRoute
+  '/championships/create/': typeof AppChampionshipsCreateIndexRoute
+  '/c/$slug/matches/': typeof CSlugMatchesIndexRoute
+  '/c/$slug/players/': typeof CSlugPlayersIndexRoute
+  '/c/$slug/standings/': typeof CSlugStandingsIndexRoute
+  '/c/$slug/structure/': typeof CSlugStructureIndexRoute
+  '/championships/$championshipId/awards/': typeof AppChampionshipsChampionshipIdAwardsIndexRoute
+  '/championships/$championshipId/members/': typeof AppChampionshipsChampionshipIdMembersIndexRoute
+  '/championships/$championshipId/rules/': typeof AppChampionshipsChampionshipIdRulesIndexRoute
+  '/championships/$championshipId/settings/': typeof AppChampionshipsChampionshipIdSettingsIndexRoute
+  '/championships/$championshipId/standings/': typeof AppChampionshipsChampionshipIdStandingsIndexRoute
+  '/championships/$championshipId/structure/': typeof AppChampionshipsChampionshipIdStructureIndexRoute
+  '/c/$slug/matches/$matchId/': typeof CSlugMatchesMatchIdIndexRoute
+  '/championships/$championshipId/matches/$matchId/': typeof AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute
+  '/championships/$championshipId/matches/': typeof AppChampionshipsChampionshipIdMatchesmatchesIndexRoute
+  '/championships/$championshipId/matches/create/': typeof AppChampionshipsChampionshipIdMatchesCreateIndexRoute
+  '/championships/$championshipId/players/': typeof AppChampionshipsChampionshipIdPlayersplayersIndexRoute
+  '/championships/$championshipId/teams/': typeof AppChampionshipsChampionshipIdTeamsteamsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/app': typeof AppIndexRoute
+  '/': typeof AppIndexRoute
+  '/account': typeof AppAccountIndexRoute
   '/forgot-password': typeof AuthForgotPasswordIndexRoute
   '/register': typeof AuthRegisterIndexRoute
   '/reset-password': typeof AuthResetPasswordIndexRoute
   '/sign-in': typeof AuthSignInIndexRoute
+  '/c/$slug': typeof CSlugIndexRoute
+  '/invitations/accept': typeof InvitationsAcceptIndexRoute
+  '/championships/$championshipId': typeof AppChampionshipsChampionshipIdIndexRoute
+  '/championships/create': typeof AppChampionshipsCreateIndexRoute
+  '/c/$slug/matches': typeof CSlugMatchesIndexRoute
+  '/c/$slug/players': typeof CSlugPlayersIndexRoute
+  '/c/$slug/standings': typeof CSlugStandingsIndexRoute
+  '/c/$slug/structure': typeof CSlugStructureIndexRoute
+  '/championships/$championshipId/awards': typeof AppChampionshipsChampionshipIdAwardsIndexRoute
+  '/championships/$championshipId/members': typeof AppChampionshipsChampionshipIdMembersIndexRoute
+  '/championships/$championshipId/rules': typeof AppChampionshipsChampionshipIdRulesIndexRoute
+  '/championships/$championshipId/settings': typeof AppChampionshipsChampionshipIdSettingsIndexRoute
+  '/championships/$championshipId/standings': typeof AppChampionshipsChampionshipIdStandingsIndexRoute
+  '/championships/$championshipId/structure': typeof AppChampionshipsChampionshipIdStructureIndexRoute
+  '/c/$slug/matches/$matchId': typeof CSlugMatchesMatchIdIndexRoute
+  '/championships/$championshipId/matches/$matchId': typeof AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute
+  '/championships/$championshipId/matches': typeof AppChampionshipsChampionshipIdMatchesmatchesIndexRoute
+  '/championships/$championshipId/matches/create': typeof AppChampionshipsChampionshipIdMatchesCreateIndexRoute
+  '/championships/$championshipId/players': typeof AppChampionshipsChampionshipIdPlayersplayersIndexRoute
+  '/championships/$championshipId/teams': typeof AppChampionshipsChampionshipIdTeamsteamsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppLayoutRouteWithChildren
   '/_auth': typeof AuthLayoutRouteWithChildren
-  '/app': typeof AppLayoutRouteWithChildren
-  '/app/': typeof AppIndexRoute
+  '/c/$slug': typeof CSlugLayoutRouteWithChildren
+  '/_app/': typeof AppIndexRoute
+  '/_app/championships/$championshipId': typeof AppChampionshipsChampionshipIdLayoutRouteWithChildren
+  '/_app/account/': typeof AppAccountIndexRoute
   '/_auth/forgot-password/': typeof AuthForgotPasswordIndexRoute
   '/_auth/register/': typeof AuthRegisterIndexRoute
   '/_auth/reset-password/': typeof AuthResetPasswordIndexRoute
   '/_auth/sign-in/': typeof AuthSignInIndexRoute
+  '/c/$slug/': typeof CSlugIndexRoute
+  '/invitations/accept/': typeof InvitationsAcceptIndexRoute
+  '/_app/championships/$championshipId/': typeof AppChampionshipsChampionshipIdIndexRoute
+  '/_app/championships/create/': typeof AppChampionshipsCreateIndexRoute
+  '/c/$slug/matches/': typeof CSlugMatchesIndexRoute
+  '/c/$slug/players/': typeof CSlugPlayersIndexRoute
+  '/c/$slug/standings/': typeof CSlugStandingsIndexRoute
+  '/c/$slug/structure/': typeof CSlugStructureIndexRoute
+  '/_app/championships/$championshipId/awards/': typeof AppChampionshipsChampionshipIdAwardsIndexRoute
+  '/_app/championships/$championshipId/members/': typeof AppChampionshipsChampionshipIdMembersIndexRoute
+  '/_app/championships/$championshipId/rules/': typeof AppChampionshipsChampionshipIdRulesIndexRoute
+  '/_app/championships/$championshipId/settings/': typeof AppChampionshipsChampionshipIdSettingsIndexRoute
+  '/_app/championships/$championshipId/standings/': typeof AppChampionshipsChampionshipIdStandingsIndexRoute
+  '/_app/championships/$championshipId/structure/': typeof AppChampionshipsChampionshipIdStructureIndexRoute
+  '/c/$slug/matches/$matchId/': typeof CSlugMatchesMatchIdIndexRoute
+  '/_app/championships/$championshipId/matches/$matchId/': typeof AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute
+  '/_app/championships/$championshipId/matches/(matches)/': typeof AppChampionshipsChampionshipIdMatchesmatchesIndexRoute
+  '/_app/championships/$championshipId/matches/create/': typeof AppChampionshipsChampionshipIdMatchesCreateIndexRoute
+  '/_app/championships/$championshipId/players/(players)/': typeof AppChampionshipsChampionshipIdPlayersplayersIndexRoute
+  '/_app/championships/$championshipId/teams/(teams)/': typeof AppChampionshipsChampionshipIdTeamsteamsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
-    | '/app/'
+    | '/c/$slug'
+    | '/championships/$championshipId'
+    | '/account/'
     | '/forgot-password/'
     | '/register/'
     | '/reset-password/'
     | '/sign-in/'
+    | '/c/$slug/'
+    | '/invitations/accept/'
+    | '/championships/$championshipId/'
+    | '/championships/create/'
+    | '/c/$slug/matches/'
+    | '/c/$slug/players/'
+    | '/c/$slug/standings/'
+    | '/c/$slug/structure/'
+    | '/championships/$championshipId/awards/'
+    | '/championships/$championshipId/members/'
+    | '/championships/$championshipId/rules/'
+    | '/championships/$championshipId/settings/'
+    | '/championships/$championshipId/standings/'
+    | '/championships/$championshipId/structure/'
+    | '/c/$slug/matches/$matchId/'
+    | '/championships/$championshipId/matches/$matchId/'
+    | '/championships/$championshipId/matches/'
+    | '/championships/$championshipId/matches/create/'
+    | '/championships/$championshipId/players/'
+    | '/championships/$championshipId/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app'
+    | '/account'
     | '/forgot-password'
     | '/register'
     | '/reset-password'
     | '/sign-in'
+    | '/c/$slug'
+    | '/invitations/accept'
+    | '/championships/$championshipId'
+    | '/championships/create'
+    | '/c/$slug/matches'
+    | '/c/$slug/players'
+    | '/c/$slug/standings'
+    | '/c/$slug/structure'
+    | '/championships/$championshipId/awards'
+    | '/championships/$championshipId/members'
+    | '/championships/$championshipId/rules'
+    | '/championships/$championshipId/settings'
+    | '/championships/$championshipId/standings'
+    | '/championships/$championshipId/structure'
+    | '/c/$slug/matches/$matchId'
+    | '/championships/$championshipId/matches/$matchId'
+    | '/championships/$championshipId/matches'
+    | '/championships/$championshipId/matches/create'
+    | '/championships/$championshipId/players'
+    | '/championships/$championshipId/teams'
   id:
     | '__root__'
-    | '/'
+    | '/_app'
     | '/_auth'
-    | '/app'
-    | '/app/'
+    | '/c/$slug'
+    | '/_app/'
+    | '/_app/championships/$championshipId'
+    | '/_app/account/'
     | '/_auth/forgot-password/'
     | '/_auth/register/'
     | '/_auth/reset-password/'
     | '/_auth/sign-in/'
+    | '/c/$slug/'
+    | '/invitations/accept/'
+    | '/_app/championships/$championshipId/'
+    | '/_app/championships/create/'
+    | '/c/$slug/matches/'
+    | '/c/$slug/players/'
+    | '/c/$slug/standings/'
+    | '/c/$slug/structure/'
+    | '/_app/championships/$championshipId/awards/'
+    | '/_app/championships/$championshipId/members/'
+    | '/_app/championships/$championshipId/rules/'
+    | '/_app/championships/$championshipId/settings/'
+    | '/_app/championships/$championshipId/standings/'
+    | '/_app/championships/$championshipId/structure/'
+    | '/c/$slug/matches/$matchId/'
+    | '/_app/championships/$championshipId/matches/$matchId/'
+    | '/_app/championships/$championshipId/matches/(matches)/'
+    | '/_app/championships/$championshipId/matches/create/'
+    | '/_app/championships/$championshipId/players/(players)/'
+    | '/_app/championships/$championshipId/teams/(teams)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthLayoutRoute: typeof AuthLayoutRouteWithChildren
   AppLayoutRoute: typeof AppLayoutRouteWithChildren
+  AuthLayoutRoute: typeof AuthLayoutRouteWithChildren
+  CSlugLayoutRoute: typeof CSlugLayoutRouteWithChildren
+  InvitationsAcceptIndexRoute: typeof InvitationsAcceptIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_auth': {
       id: '/_auth'
       path: ''
@@ -138,19 +404,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
+    '/_app/': {
+      id: '/_app/'
       path: '/'
-      fullPath: '/app/'
+      fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppLayoutRoute
+    }
+    '/c/$slug': {
+      id: '/c/$slug'
+      path: '/c/$slug'
+      fullPath: '/c/$slug'
+      preLoaderRoute: typeof CSlugLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations/accept/': {
+      id: '/invitations/accept/'
+      path: '/invitations/accept'
+      fullPath: '/invitations/accept/'
+      preLoaderRoute: typeof InvitationsAcceptIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/c/$slug/': {
+      id: '/c/$slug/'
+      path: '/'
+      fullPath: '/c/$slug/'
+      preLoaderRoute: typeof CSlugIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
     }
     '/_auth/sign-in/': {
       id: '/_auth/sign-in/'
@@ -180,8 +467,215 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordIndexRouteImport
       parentRoute: typeof AuthLayoutRoute
     }
+    '/_app/account/': {
+      id: '/_app/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AppAccountIndexRouteImport
+      parentRoute: typeof AppLayoutRoute
+    }
+    '/_app/championships/$championshipId': {
+      id: '/_app/championships/$championshipId'
+      path: '/championships/$championshipId'
+      fullPath: '/championships/$championshipId'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdLayoutRouteImport
+      parentRoute: typeof AppLayoutRoute
+    }
+    '/c/$slug/structure/': {
+      id: '/c/$slug/structure/'
+      path: '/structure'
+      fullPath: '/c/$slug/structure/'
+      preLoaderRoute: typeof CSlugStructureIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
+    }
+    '/c/$slug/standings/': {
+      id: '/c/$slug/standings/'
+      path: '/standings'
+      fullPath: '/c/$slug/standings/'
+      preLoaderRoute: typeof CSlugStandingsIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
+    }
+    '/c/$slug/players/': {
+      id: '/c/$slug/players/'
+      path: '/players'
+      fullPath: '/c/$slug/players/'
+      preLoaderRoute: typeof CSlugPlayersIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
+    }
+    '/c/$slug/matches/': {
+      id: '/c/$slug/matches/'
+      path: '/matches'
+      fullPath: '/c/$slug/matches/'
+      preLoaderRoute: typeof CSlugMatchesIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
+    }
+    '/_app/championships/create/': {
+      id: '/_app/championships/create/'
+      path: '/championships/create'
+      fullPath: '/championships/create/'
+      preLoaderRoute: typeof AppChampionshipsCreateIndexRouteImport
+      parentRoute: typeof AppLayoutRoute
+    }
+    '/_app/championships/$championshipId/': {
+      id: '/_app/championships/$championshipId/'
+      path: '/'
+      fullPath: '/championships/$championshipId/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/c/$slug/matches/$matchId/': {
+      id: '/c/$slug/matches/$matchId/'
+      path: '/matches/$matchId'
+      fullPath: '/c/$slug/matches/$matchId/'
+      preLoaderRoute: typeof CSlugMatchesMatchIdIndexRouteImport
+      parentRoute: typeof CSlugLayoutRoute
+    }
+    '/_app/championships/$championshipId/structure/': {
+      id: '/_app/championships/$championshipId/structure/'
+      path: '/structure'
+      fullPath: '/championships/$championshipId/structure/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdStructureIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/standings/': {
+      id: '/_app/championships/$championshipId/standings/'
+      path: '/standings'
+      fullPath: '/championships/$championshipId/standings/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdStandingsIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/settings/': {
+      id: '/_app/championships/$championshipId/settings/'
+      path: '/settings'
+      fullPath: '/championships/$championshipId/settings/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdSettingsIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/rules/': {
+      id: '/_app/championships/$championshipId/rules/'
+      path: '/rules'
+      fullPath: '/championships/$championshipId/rules/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdRulesIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/members/': {
+      id: '/_app/championships/$championshipId/members/'
+      path: '/members'
+      fullPath: '/championships/$championshipId/members/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdMembersIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/awards/': {
+      id: '/_app/championships/$championshipId/awards/'
+      path: '/awards'
+      fullPath: '/championships/$championshipId/awards/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdAwardsIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/teams/(teams)/': {
+      id: '/_app/championships/$championshipId/teams/(teams)/'
+      path: '/teams'
+      fullPath: '/championships/$championshipId/teams/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdTeamsteamsIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/players/(players)/': {
+      id: '/_app/championships/$championshipId/players/(players)/'
+      path: '/players'
+      fullPath: '/championships/$championshipId/players/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdPlayersplayersIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/matches/create/': {
+      id: '/_app/championships/$championshipId/matches/create/'
+      path: '/matches/create'
+      fullPath: '/championships/$championshipId/matches/create/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdMatchesCreateIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/matches/(matches)/': {
+      id: '/_app/championships/$championshipId/matches/(matches)/'
+      path: '/matches'
+      fullPath: '/championships/$championshipId/matches/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdMatchesmatchesIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
+    '/_app/championships/$championshipId/matches/$matchId/': {
+      id: '/_app/championships/$championshipId/matches/$matchId/'
+      path: '/matches/$matchId'
+      fullPath: '/championships/$championshipId/matches/$matchId/'
+      preLoaderRoute: typeof AppChampionshipsChampionshipIdMatchesMatchIdIndexRouteImport
+      parentRoute: typeof AppChampionshipsChampionshipIdLayoutRoute
+    }
   }
 }
+
+interface AppChampionshipsChampionshipIdLayoutRouteChildren {
+  AppChampionshipsChampionshipIdIndexRoute: typeof AppChampionshipsChampionshipIdIndexRoute
+  AppChampionshipsChampionshipIdAwardsIndexRoute: typeof AppChampionshipsChampionshipIdAwardsIndexRoute
+  AppChampionshipsChampionshipIdMembersIndexRoute: typeof AppChampionshipsChampionshipIdMembersIndexRoute
+  AppChampionshipsChampionshipIdRulesIndexRoute: typeof AppChampionshipsChampionshipIdRulesIndexRoute
+  AppChampionshipsChampionshipIdSettingsIndexRoute: typeof AppChampionshipsChampionshipIdSettingsIndexRoute
+  AppChampionshipsChampionshipIdStandingsIndexRoute: typeof AppChampionshipsChampionshipIdStandingsIndexRoute
+  AppChampionshipsChampionshipIdStructureIndexRoute: typeof AppChampionshipsChampionshipIdStructureIndexRoute
+  AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute: typeof AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute
+  AppChampionshipsChampionshipIdMatchesmatchesIndexRoute: typeof AppChampionshipsChampionshipIdMatchesmatchesIndexRoute
+  AppChampionshipsChampionshipIdMatchesCreateIndexRoute: typeof AppChampionshipsChampionshipIdMatchesCreateIndexRoute
+  AppChampionshipsChampionshipIdPlayersplayersIndexRoute: typeof AppChampionshipsChampionshipIdPlayersplayersIndexRoute
+  AppChampionshipsChampionshipIdTeamsteamsIndexRoute: typeof AppChampionshipsChampionshipIdTeamsteamsIndexRoute
+}
+
+const AppChampionshipsChampionshipIdLayoutRouteChildren: AppChampionshipsChampionshipIdLayoutRouteChildren =
+  {
+    AppChampionshipsChampionshipIdIndexRoute:
+      AppChampionshipsChampionshipIdIndexRoute,
+    AppChampionshipsChampionshipIdAwardsIndexRoute:
+      AppChampionshipsChampionshipIdAwardsIndexRoute,
+    AppChampionshipsChampionshipIdMembersIndexRoute:
+      AppChampionshipsChampionshipIdMembersIndexRoute,
+    AppChampionshipsChampionshipIdRulesIndexRoute:
+      AppChampionshipsChampionshipIdRulesIndexRoute,
+    AppChampionshipsChampionshipIdSettingsIndexRoute:
+      AppChampionshipsChampionshipIdSettingsIndexRoute,
+    AppChampionshipsChampionshipIdStandingsIndexRoute:
+      AppChampionshipsChampionshipIdStandingsIndexRoute,
+    AppChampionshipsChampionshipIdStructureIndexRoute:
+      AppChampionshipsChampionshipIdStructureIndexRoute,
+    AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute:
+      AppChampionshipsChampionshipIdMatchesMatchIdIndexRoute,
+    AppChampionshipsChampionshipIdMatchesmatchesIndexRoute:
+      AppChampionshipsChampionshipIdMatchesmatchesIndexRoute,
+    AppChampionshipsChampionshipIdMatchesCreateIndexRoute:
+      AppChampionshipsChampionshipIdMatchesCreateIndexRoute,
+    AppChampionshipsChampionshipIdPlayersplayersIndexRoute:
+      AppChampionshipsChampionshipIdPlayersplayersIndexRoute,
+    AppChampionshipsChampionshipIdTeamsteamsIndexRoute:
+      AppChampionshipsChampionshipIdTeamsteamsIndexRoute,
+  }
+
+const AppChampionshipsChampionshipIdLayoutRouteWithChildren =
+  AppChampionshipsChampionshipIdLayoutRoute._addFileChildren(
+    AppChampionshipsChampionshipIdLayoutRouteChildren,
+  )
+
+interface AppLayoutRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+  AppChampionshipsChampionshipIdLayoutRoute: typeof AppChampionshipsChampionshipIdLayoutRouteWithChildren
+  AppAccountIndexRoute: typeof AppAccountIndexRoute
+  AppChampionshipsCreateIndexRoute: typeof AppChampionshipsCreateIndexRoute
+}
+
+const AppLayoutRouteChildren: AppLayoutRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+  AppChampionshipsChampionshipIdLayoutRoute:
+    AppChampionshipsChampionshipIdLayoutRouteWithChildren,
+  AppAccountIndexRoute: AppAccountIndexRoute,
+  AppChampionshipsCreateIndexRoute: AppChampionshipsCreateIndexRoute,
+}
+
+const AppLayoutRouteWithChildren = AppLayoutRoute._addFileChildren(
+  AppLayoutRouteChildren,
+)
 
 interface AuthLayoutRouteChildren {
   AuthForgotPasswordIndexRoute: typeof AuthForgotPasswordIndexRoute
@@ -201,22 +695,33 @@ const AuthLayoutRouteWithChildren = AuthLayoutRoute._addFileChildren(
   AuthLayoutRouteChildren,
 )
 
-interface AppLayoutRouteChildren {
-  AppIndexRoute: typeof AppIndexRoute
+interface CSlugLayoutRouteChildren {
+  CSlugIndexRoute: typeof CSlugIndexRoute
+  CSlugMatchesIndexRoute: typeof CSlugMatchesIndexRoute
+  CSlugPlayersIndexRoute: typeof CSlugPlayersIndexRoute
+  CSlugStandingsIndexRoute: typeof CSlugStandingsIndexRoute
+  CSlugStructureIndexRoute: typeof CSlugStructureIndexRoute
+  CSlugMatchesMatchIdIndexRoute: typeof CSlugMatchesMatchIdIndexRoute
 }
 
-const AppLayoutRouteChildren: AppLayoutRouteChildren = {
-  AppIndexRoute: AppIndexRoute,
+const CSlugLayoutRouteChildren: CSlugLayoutRouteChildren = {
+  CSlugIndexRoute: CSlugIndexRoute,
+  CSlugMatchesIndexRoute: CSlugMatchesIndexRoute,
+  CSlugPlayersIndexRoute: CSlugPlayersIndexRoute,
+  CSlugStandingsIndexRoute: CSlugStandingsIndexRoute,
+  CSlugStructureIndexRoute: CSlugStructureIndexRoute,
+  CSlugMatchesMatchIdIndexRoute: CSlugMatchesMatchIdIndexRoute,
 }
 
-const AppLayoutRouteWithChildren = AppLayoutRoute._addFileChildren(
-  AppLayoutRouteChildren,
+const CSlugLayoutRouteWithChildren = CSlugLayoutRoute._addFileChildren(
+  CSlugLayoutRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthLayoutRoute: AuthLayoutRouteWithChildren,
   AppLayoutRoute: AppLayoutRouteWithChildren,
+  AuthLayoutRoute: AuthLayoutRouteWithChildren,
+  CSlugLayoutRoute: CSlugLayoutRouteWithChildren,
+  InvitationsAcceptIndexRoute: InvitationsAcceptIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

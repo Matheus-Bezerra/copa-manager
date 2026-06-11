@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, Link } from '@tanstack/react-router';
+import { Link, getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
@@ -7,11 +7,14 @@ import type { z } from 'zod';
 import { ButtonLoading } from '@/components/button-loading';
 import { FormErrorMessage } from '@/components/form-error-message';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { useLogin } from '@/http/hooks/auth/use-login';
 import { z as zod } from '@/lib/zod';
 import { useAuthStore } from '@/stores/auth-store';
 import { errorHandler } from '@/utils/error-handler';
+
+const signInRouteApi = getRouteApi('/_auth/sign-in/');
 
 const signInSchema = zod.object({
   email: zod.email(),
@@ -22,6 +25,7 @@ type SignInFormData = z.infer<typeof signInSchema>;
 
 export function SignInForm() {
   const navigate = useNavigate();
+  const { redirect } = signInRouteApi.useSearch();
   const { login } = useAuthStore();
 
   const {
@@ -44,7 +48,13 @@ export function SignInForm() {
   async function onSubmit(formData: SignInFormData) {
     const result = await signIn({ data: formData });
     login(result.user, result.accessToken, result.refreshToken);
-    navigate({ to: '/app' });
+
+    if (redirect?.startsWith('/')) {
+      window.location.href = redirect;
+      return;
+    }
+
+    navigate({ to: '/' });
   }
 
   return (
@@ -67,14 +77,13 @@ export function SignInForm() {
           <Label htmlFor="password">Senha</Label>
           <Link
             to="/forgot-password"
-            className="text-muted-foreground text-xs underline-offset-4 hover:underline"
+            className="text-link text-xs underline-offset-4 hover:underline"
           >
             Esqueceu a senha?
           </Link>
         </div>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           placeholder="••••••••"
           autoComplete="current-password"
           aria-invalid={!!errors.password}

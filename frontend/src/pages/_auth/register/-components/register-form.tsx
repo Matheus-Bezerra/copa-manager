@@ -7,6 +7,7 @@ import type { z } from 'zod';
 import { ButtonLoading } from '@/components/button-loading';
 import { FormErrorMessage } from '@/components/form-error-message';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { useRegister } from '@/http/hooks/auth/use-register';
 import { z as zod } from '@/lib/zod';
@@ -51,7 +52,7 @@ export function RegisterForm() {
   async function onSubmit({ name, email, password }: RegisterFormData) {
     const result = await createAccount({ data: { name, email, password } });
     login(result.user, result.accessToken, result.refreshToken);
-    navigate({ to: '/app' });
+    navigate({ to: '/' });
   }
 
   return (
@@ -84,9 +85,8 @@ export function RegisterForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="password">Senha</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           placeholder="••••••••"
           autoComplete="new-password"
           aria-invalid={!!errors.password}
@@ -97,9 +97,8 @@ export function RegisterForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="confirmPassword">Confirmar senha</Label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           placeholder="••••••••"
           autoComplete="new-password"
           aria-invalid={!!errors.confirmPassword}

@@ -7,6 +7,7 @@ import type { z } from 'zod';
 
 import { ButtonLoading } from '@/components/button-loading';
 import { FormErrorMessage } from '@/components/form-error-message';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForgotPassword } from '@/http/hooks/auth/use-forgot-password';
@@ -47,19 +48,16 @@ export function ForgotPasswordForm() {
   if (submitted) {
     return (
       <div className="space-y-4 text-center">
-        <div className="bg-muted rounded-lg p-4">
+        <div className="border border-border/50 bg-muted/50 rounded-lg p-4">
           <p className="text-sm font-medium">E-mail enviado!</p>
           <p className="text-muted-foreground mt-1 text-sm">
             Verifique sua caixa de entrada. Enviamos um código de 6 dígitos para redefinir
             sua senha. Ele expira em 15 minutos.
           </p>
         </div>
-        <Link
-          to="/reset-password"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors"
-        >
-          Inserir código
-        </Link>
+        <Button asChild className="w-full">
+          <Link to="/reset-password">Inserir código</Link>
+        </Button>
       </div>
     );
   }

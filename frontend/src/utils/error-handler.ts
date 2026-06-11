@@ -1,6 +1,6 @@
 import type { AxiosError } from 'axios';
 
-import type { ApiErrorResponse } from '@/http/types/api-error';
+import type { ApiErrorPayload, ApiErrorResponse } from '@/http/types/api-error';
 
 type ErrorHandlerResult = {
   code: string;
@@ -8,10 +8,19 @@ type ErrorHandlerResult = {
 };
 
 export function errorHandler(error: unknown): ErrorHandlerResult {
-  const axiosError = error as AxiosError<ApiErrorResponse>;
+  const axiosError = error as AxiosError<ApiErrorResponse & ApiErrorPayload>;
 
   if (axiosError.response?.data?.error) {
     const { code, message } = axiosError.response.data.error;
+
+    return {
+      code,
+      description: message,
+    };
+  }
+
+  if (axiosError.response?.data?.code && axiosError.response?.data?.message) {
+    const { code, message } = axiosError.response.data;
 
     return {
       code,

@@ -7,6 +7,7 @@ import type { z } from 'zod';
 import { ButtonLoading } from '@/components/button-loading';
 import { FormErrorMessage } from '@/components/form-error-message';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { useResetPassword } from '@/http/hooks/auth/use-reset-password';
 import { z as zod } from '@/lib/zod';
@@ -74,9 +75,8 @@ export function ResetPasswordForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="newPassword">Nova senha</Label>
-        <Input
+        <PasswordInput
           id="newPassword"
-          type="password"
           placeholder="••••••••"
           autoComplete="new-password"
           aria-invalid={!!errors.newPassword}
@@ -87,9 +87,8 @@ export function ResetPasswordForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           placeholder="••••••••"
           autoComplete="new-password"
           aria-invalid={!!errors.confirmPassword}
