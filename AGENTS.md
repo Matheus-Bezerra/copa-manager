@@ -43,6 +43,11 @@ Define a arquitetura do backend.
 Define a arquitetura do frontend.
 (Estrutura de páginas, componentes, rotas, ESLint, Prettier e organização.)
 
+### frontend-implementation-checklist.md
+
+Checklist de implementação do frontend por step (S00–S16).
+(Ordem de execução, tipos, hooks, rotas e Definition of Done por feature.)
+
 ## Regras
 
 - Não inventar regras de negócio.
