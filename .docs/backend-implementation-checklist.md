@@ -155,7 +155,7 @@ Fluxo obrigatório: **Controller → Use Case → Repository → Prisma** (Prism
 
 ### Services (`src/services/competition/`)
 
-- [x] `calculate-group-stage-rounds.ts` — `ROUND_ROBIN` → `(N × (N-1)) / 2`; `DOUBLE_ROUND_ROBIN` → `N × (N-1)`; usa maior `teams` entre grupos
+- [x] `calculate-group-stage-rounds.ts` — `ROUND_ROBIN` → `N-1` (par) / `N` (ímpar); `DOUBLE_ROUND_ROBIN` → dobro; usa maior `teams` entre grupos
 - [x] `calculate-knockout-rounds.ts` — nomes por `qualifiedTeams` (Semifinal, Final, 3º Lugar, etc.)
 - [x] `generate-knockout-bracket.ts` — partidas placeholder + `MatchBracketLink` (WINNER/LOSER, HOME/AWAY)
 - [x] `validate-setup-payload.ts` — `order` único, `format` em GROUP_STAGE, `qualifiedTeams` potência de 2, grupos obrigatórios em GROUP_STAGE

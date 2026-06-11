@@ -455,12 +455,14 @@ Partidas.
 * home_team_id
 * away_team_id
 * scheduled_at
+* started_at (nullable — preenchido quando status passa para IN_PROGRESS)
 * status
 * created_at
 * updated_at
 
 ### Notes
 
+* `started_at` é definido automaticamente ao iniciar a partida (`status = IN_PROGRESS`) e usado pelo frontend para calcular o timer ao vivo.
 * group_id é obrigatório quando a fase da rodada é GROUP_STAGE; nulo em fases KNOCKOUT.
 * O stage é derivado via round.stage_id.
 * Em fases `KNOCKOUT`, partidas podem ser criadas sem times (`home_team_id` / `away_team_id` nulos) como placeholder até avanço automático ou sorteio manual.
@@ -603,12 +605,19 @@ Regras de pontuação do campeonato (uma por campeonato).
 * win_points (default 3)
 * draw_points (default 1)
 * penalty_bonus_points (default 0)
+* yellow_cards_for_suspension (default 3)
+* red_card_suspension_games (default 1)
+* match_duration (default 90 — duração de cada partida em minutos)
 * created_at
 * updated_at
 
 ### Constraints
 
 * unique(championship_id)
+
+### Notes
+
+* `match_duration` define a duração regulamentar de cada partida (em minutos) e alimenta o timer de contagem regressiva na tela de partida em andamento.
 
 ---
 
@@ -645,6 +654,7 @@ Premiações concedidas.
 * id
 * championship_id
 * player_id
+* match_id (nullable — preenchido automaticamente ao definir MVP da partida)
 * award_type
 * created_at
 
@@ -652,6 +662,7 @@ Premiações concedidas.
 
 * championship_id
 * player_id
+* match_id
 
 ---
 

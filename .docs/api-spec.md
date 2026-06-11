@@ -772,8 +772,8 @@ Cria toda a estrutura de fases, grupos e rodadas em uma única operação.
 * `groups.teams` define a quantidade de times por grupo **apenas no momento do setup**; usado para calcular rodadas em `GROUP_STAGE`. **Não é persistido** — após o setup, a UI reflete os times cadastrados no campeonato.
 * A ordem dos grupos segue a posição no array (`displayOrder` 1, 2, 3...).
 * **GROUP_STAGE**: rodadas geradas com base em `format` e no maior `teams` entre os grupos.
-  * `ROUND_ROBIN` → `(N × (N - 1)) / 2` rodadas, nomeadas "Rodada 1", "Rodada 2", etc.
-  * `DOUBLE_ROUND_ROBIN` → `N × (N - 1)` rodadas.
+  * `ROUND_ROBIN` → `N - 1` rodadas (N par) ou `N` rodadas (N ímpar), nomeadas "Rodada 1", "Rodada 2", etc.
+  * `DOUBLE_ROUND_ROBIN` → `2 × (N - 1)` rodadas (N par) ou `2 × N` rodadas (N ímpar).
 * **KNOCKOUT**: rodadas geradas com base em `qualifiedTeams` e auto-nomeadas (ex.: "Semifinal", "Final"). Se `thirdPlaceMatch: true`, adiciona rodada "3º Lugar" em paralelo à "Final".
 * **KNOCKOUT**: também gera **partidas placeholder** da chave e **vínculos de avanço** (`MatchBracketLink`) entre rodadas.
 * `teamsToAdvance` em fases `GROUP_STAGE`: quantos times por grupo avançam para a fase `KNOCKOUT` seguinte (default `1`).
@@ -1068,6 +1068,17 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
 * `roundId` (opcional) — filtra partidas de uma rodada.
 * `groupId` (opcional) — filtra partidas de um grupo (aplicável a fases `GROUP_STAGE`).
 
+### Response (match list item)
+
+Cada item inclui os campos de `match` mais:
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `homeScore` | number \| null | Placar do mandante (`FINISHED` usa resultado oficial; `IN_PROGRESS` conta gols registrados) |
+| `awayScore` | number \| null | Placar do visitante |
+
+`null` em partidas `SCHEDULED` ou `CANCELLED`.
+
 ---
 
 ## Get Match
@@ -1077,6 +1088,58 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
 ```http
 /championships/{championshipId}/matches/{matchId}
 ```
+
+### Response (match object)
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` | string | Identificador da partida |
+| `championshipId` | string | Campeonato |
+| `roundId` | string | Rodada |
+| `groupId` | string \| null | Grupo (fase de grupos) |
+| `homeTeamId` | string \| null | Time mandante |
+| `awayTeamId` | string \| null | Time visitante |
+| `scheduledAt` | datetime \| null | Data/hora agendada |
+| `startedAt` | datetime \| null | Momento em que a partida foi iniciada (`IN_PROGRESS`) |
+| `status` | enum | `SCHEDULED`, `IN_PROGRESS`, `FINISHED`, `CANCELLED` |
+
+### Response (result object, nullable)
+
+Retornado junto com `match`. `null` enquanto a partida não tiver resultado registrado.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` | string | Identificador do resultado |
+| `matchId` | string | Partida |
+| `homeScore` | number | Gols do mandante |
+| `awayScore` | number | Gols do visitante |
+| `homePenaltyScore` | number \| null | Pênaltis do mandante |
+| `awayPenaltyScore` | number \| null | Pênaltis do visitante |
+| `createdAt` | datetime | Data de registro |
+
+---
+
+## Update Match Status
+
+### PATCH
+
+```http
+/championships/{championshipId}/matches/{matchId}/status
+```
+
+### Request
+
+```json
+{
+  "status": "IN_PROGRESS"
+}
+```
+
+### Notes
+
+* Ao definir `status: IN_PROGRESS`, o backend grava `startedAt` com o timestamp atual.
+* `IN_PROGRESS` exige `homeTeamId` e `awayTeamId` definidos; caso contrário retorna `422` com `MATCH/TEAMS_REQUIRED`.
+* Status permitidos: `IN_PROGRESS` (de `SCHEDULED`) e `CANCELLED`.
 
 ---
 
@@ -1131,10 +1194,16 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
 
 ```json
 {
-  "playerId": "",
+  "playerId": "01H...",
+  "teamId": "01H...",
   "minute": 12
 }
 ```
+
+### Notes
+
+* `playerId` é opcional. Quando omitido, `teamId` é obrigatório para identificar o time que marcou.
+* Cartões amarelos e vermelhos continuam exigindo `playerId`.
 
 ---
 
@@ -1192,6 +1261,11 @@ Retorna a estrutura completa do campeonato em uma única resposta: fases, grupos
 }
 ```
 
+### Notes
+
+* A partida deve estar `FINISHED`.
+* Cria ou substitui o evento `MVP` da partida e sincroniza automaticamente a premiação `MATCH_MVP` no histórico de awards (vinculada ao `matchId`).
+
 ---
 
 # Standings
@@ -1248,16 +1322,24 @@ Retorna as regras de pontuação do campeonato.
 ```json
 {
   "data": {
-    "winPoints": 3,
-    "drawPoints": 1,
-    "penaltyBonusPoints": 0
+    "rules": {
+      "winPoints": 3,
+      "drawPoints": 1,
+      "penaltyBonusPoints": 0,
+      "yellowCardsForSuspension": 3,
+      "redCardSuspensionGames": 1,
+      "matchDuration": 90,
+      "createdAt": null,
+      "updatedAt": null
+    }
   }
 }
 ```
 
 ### Notes
 
-* Se o registro ainda não foi configurado, retorna os valores padrão (`winPoints: 3`, `drawPoints: 1`, `penaltyBonusPoints: 0`).
+* Se o registro ainda não foi configurado, retorna os valores padrão (`winPoints: 3`, `drawPoints: 1`, `penaltyBonusPoints: 0`, `yellowCardsForSuspension: 3`, `redCardSuspensionGames: 1`, `matchDuration: 90`).
+* `matchDuration` é a duração regulamentar de cada partida em minutos; usado pelo timer na tela de partida em andamento.
 
 ---
 
@@ -1275,7 +1357,10 @@ Retorna as regras de pontuação do campeonato.
 {
   "winPoints": 3,
   "drawPoints": 1,
-  "penaltyBonusPoints": 0
+  "penaltyBonusPoints": 0,
+  "yellowCardsForSuspension": 3,
+  "redCardSuspensionGames": 1,
+  "matchDuration": 90
 }
 ```
 
@@ -1283,6 +1368,7 @@ Retorna as regras de pontuação do campeonato.
 
 * Todos os campos são opcionais; campos omitidos mantêm o valor atual.
 * `winPoints` e `drawPoints` devem ser inteiros ≥ 0.
+* `matchDuration` deve ser inteiro ≥ 1 (minutos).
 * Altera pontuações retroativamente apenas ao recalcular standings.
 
 ---

@@ -269,8 +269,10 @@ Fases do tipo `GROUP_STAGE` devem informar um **formato** que define como as rod
 
 A geração automática de rodadas usa o maior número de times informado entre os grupos da fase:
 
-* `ROUND_ROBIN` com N times → `(N × (N - 1)) / 2` rodadas.
-* `DOUBLE_ROUND_ROBIN` com N times → `N × (N - 1)` rodadas.
+* `ROUND_ROBIN` com N times → `N - 1` rodadas (N par) ou `N` rodadas (N ímpar).
+* `DOUBLE_ROUND_ROBIN` com N times → `2 × (N - 1)` rodadas (N par) ou `2 × N` rodadas (N ímpar).
+
+Exemplo com 4 times: turno único gera 3 rodadas (2 partidas por rodada, 6 confrontos no total); turno e returno gera 6 rodadas (12 confrontos no total).
 
 ## Mata-Mata (KNOCKOUT)
 
