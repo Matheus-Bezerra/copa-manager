@@ -7,6 +7,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsup",
     "start": "node build/server.js",
+    "start:prod": "prisma migrate deploy && node build/server.js",
+    "db:migrate:deploy": "prisma migrate deploy",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
