@@ -13,7 +13,7 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   splitting: false,
-  external: ['@prisma/client', '@prisma/adapter-pg', 'pg', '@prisma/client/runtime/client'],
+  external: ['dotenv', '@prisma/adapter-pg', 'pg'],
   esbuildOptions(options) {
     options.alias = {
       '@': path.join(srcDir, 'src'),
