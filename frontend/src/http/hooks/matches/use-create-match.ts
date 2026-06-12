@@ -44,9 +44,9 @@ export function useCreateMatch(
     mutationKey: createMatchMutationKey(),
     mutationFn: ({ championshipId, data }) => createMatch(championshipId, data),
     ...mutationOptions,
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (data, variables, onMutateResult, context) => {
       await invalidateMatchesQueries(queryClient, variables.championshipId);
-      await onSuccess?.(data, variables, context);
+      await onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }

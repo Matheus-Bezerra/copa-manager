@@ -129,6 +129,7 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
       done: true,
       count: null,
       to: null,
+      disabled: false,
     },
     {
       id: 'teams',
@@ -138,6 +139,7 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
       done: teamsCount >= 2,
       count: teamsCount > 0 ? `${teamsCount} ${teamsCount === 1 ? 'time' : 'times'}` : null,
       to: `/championships/$championshipId/teams` as const,
+      disabled: false,
     },
     {
       id: 'players',
@@ -170,6 +172,7 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
       done: rulesDone,
       count: rulesDone ? 'Configuradas' : null,
       to: `/championships/$championshipId/rules` as const,
+      disabled: false,
     },
     {
       id: 'matches',
@@ -212,11 +215,10 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
         </div>
 
         <div className="space-y-1">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
+          {steps.map((step) => {
             const isCurrent = !step.done && step === firstPending;
             const isPast = step.done;
-            const isDisabled = !step.done && 'disabled' in step && step.disabled;
+            const isDisabled = !step.done && step.disabled;
 
             const content = (
               <div
