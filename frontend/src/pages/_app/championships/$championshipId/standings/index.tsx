@@ -6,6 +6,7 @@ import {
   KnockoutStandingsSection,
 } from '@/components/matches/knockout-standings-fallback';
 import { StandingsViewToggle } from '@/components/standings/standings-view-toggle';
+import { TeamLabel } from '@/components/team-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -72,7 +73,6 @@ function StandingsPage() {
 
   const teams = teamsData?.teams ?? [];
   const teamById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams]);
-  const teamNameById = new Map(teams.map((t) => [t.id, t.name]));
 
   const selectedStage = groupStages.find((s) => s.id === selectedStageId);
   const groups = selectedStage?.groups ?? [];
@@ -237,13 +237,15 @@ function StandingsPage() {
                     <TableBody>
                       {standings.map((entry) => {
                         const played = entry.wins + entry.draws + entry.losses;
+                        const team = teamById.get(entry.teamId);
+
                         return (
                           <TableRow key={entry.teamId}>
                             <TableCell className="text-center font-medium">
                               {entry.position}
                             </TableCell>
-                            <TableCell className="font-medium">
-                              {teamNameById.get(entry.teamId) ?? entry.teamId.slice(0, 8)}
+                            <TableCell>
+                              <TeamLabel team={team} size="xs" fallback="—" />
                             </TableCell>
                             <TableCell className="text-center">{played}</TableCell>
                             <TableCell className="text-center">{entry.wins}</TableCell>

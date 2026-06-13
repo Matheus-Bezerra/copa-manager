@@ -1,5 +1,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { invalidateMatchesQueries } from './use-fetch-matches';
 
 import type { ResponseErrorConfig } from '../../client';
 import client from '../../client';
@@ -24,18 +26,20 @@ export async function updateMatch(
   return res.data;
 }
 
+type UpdateMatchMutationOptions = UseMutationOptions<
+  UpdateMatchResponse,
+  ResponseErrorConfig<ApiErrorPayload>,
+  { championshipId: string; matchId: string; data: UpdateMatchBody }
+>;
+
 export function useUpdateMatch(
   options?: {
-    mutation?: Omit<
-      UseMutationOptions<
-        UpdateMatchResponse,
-        ResponseErrorConfig<ApiErrorPayload>,
-        { championshipId: string; matchId: string; data: UpdateMatchBody }
-      >,
-      'mutationKey' | 'mutationFn'
-    >;
+    mutation?: Omit<UpdateMatchMutationOptions, 'mutationKey' | 'mutationFn'>;
   },
 ) {
+  const queryClient = useQueryClient();
+  const { onSuccess, ...mutationOptions } = options?.mutation ?? {};
+
   return useMutation<
     UpdateMatchResponse,
     ResponseErrorConfig<ApiErrorPayload>,
@@ -44,6 +48,10 @@ export function useUpdateMatch(
     mutationKey: updateMatchMutationKey(),
     mutationFn: ({ championshipId, matchId, data }) =>
       updateMatch(championshipId, matchId, data),
-    ...options?.mutation,
+    ...mutationOptions,
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await invalidateMatchesQueries(queryClient, variables.championshipId);
+      await onSuccess?.(data, variables, onMutateResult, context);
+    },
   });
 }

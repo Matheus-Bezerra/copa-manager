@@ -19,6 +19,45 @@ export function buildRoundStageMap(stages: StageWithStructure[]): Map<string, st
   return map;
 }
 
+function getStageMatches(
+  stageId: string,
+  stages: StageWithStructure[],
+  matches: MatchLike[],
+): MatchLike[] {
+  const roundStageMap = buildRoundStageMap(stages);
+
+  return matches.filter((match) => {
+    const matchStageId = roundStageMap.get(match.roundId);
+    return matchStageId === stageId && match.status !== 'CANCELLED';
+  });
+}
+
+function resolveActiveStageFromCandidates<T extends StageWithStructure>(
+  candidateStages: T[],
+  stages: StageWithStructure[],
+  matches: MatchLike[],
+): T | null {
+  if (candidateStages.length === 0) {
+    return null;
+  }
+
+  for (const stage of candidateStages) {
+    const stageMatches = getStageMatches(stage.id, stages, matches);
+
+    if (stageMatches.some((match) => match.status !== 'FINISHED')) {
+      return stage;
+    }
+  }
+
+  for (const stage of candidateStages) {
+    if (getStageMatches(stage.id, stages, matches).length === 0) {
+      return stage;
+    }
+  }
+
+  return candidateStages[candidateStages.length - 1] ?? null;
+}
+
 export function resolveActiveGroupStage(
   stages: StageWithStructure[],
   matches: MatchLike[],
@@ -27,24 +66,7 @@ export function resolveActiveGroupStage(
     .filter((stage) => stage.type === 'GROUP_STAGE')
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
-  if (groupStages.length === 0) {
-    return null;
-  }
-
-  const roundStageMap = buildRoundStageMap(stages);
-
-  for (const stage of groupStages) {
-    const stageMatches = matches.filter((match) => {
-      const matchStageId = roundStageMap.get(match.roundId);
-      return matchStageId === stage.id && match.status !== 'CANCELLED';
-    });
-
-    if (stageMatches.some((match) => match.status !== 'FINISHED')) {
-      return stage;
-    }
-  }
-
-  return groupStages[groupStages.length - 1] ?? null;
+  return resolveActiveStageFromCandidates(groupStages, stages, matches);
 }
 
 export function resolveActiveGroup<T extends { id: string }>(
@@ -92,20 +114,8 @@ export function resolveActiveStage(
   }
 
   const sortedStages = [...stages].sort((a, b) => a.displayOrder - b.displayOrder);
-  const roundStageMap = buildRoundStageMap(stages);
 
-  for (const stage of sortedStages) {
-    const stageMatches = matches.filter((match) => {
-      const matchStageId = roundStageMap.get(match.roundId);
-      return matchStageId === stage.id && match.status !== 'CANCELLED';
-    });
-
-    if (stageMatches.some((match) => match.status !== 'FINISHED')) {
-      return stage;
-    }
-  }
-
-  return sortedStages[sortedStages.length - 1] ?? null;
+  return resolveActiveStageFromCandidates(sortedStages, stages, matches);
 }
 
 export function resolveCurrentRound(

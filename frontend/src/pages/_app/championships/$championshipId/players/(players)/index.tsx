@@ -19,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -84,10 +85,6 @@ function PlayersPage() {
   const teams = teamsData?.teams ?? [];
 
   const teamById = useMemo(() => new Map(teams.map((team) => [team.id, team])), [teams]);
-  const teamNameById = useMemo(
-    () => new Map(teams.map((team) => [team.id, team.name])),
-    [teams],
-  );
   const selectedTeam = teamId ? teamById.get(teamId) : undefined;
 
   const { data, isPending, isError, error } = useFetchPlayers(championshipId);
@@ -99,13 +96,33 @@ function PlayersPage() {
     }
   }, [isError, error]);
 
-  const players = useMemo(() => {
-    const allPlayers = data?.players ?? [];
-    if (!teamId) {
-      return allPlayers;
+  const players = data?.players ?? [];
+
+  const playersByTeam = useMemo(() => {
+    const map = new Map<string, Player[]>();
+    for (const player of players) {
+      if (teamId && player.teamId !== teamId) continue;
+      const list = map.get(player.teamId) ?? [];
+      list.push(player);
+      map.set(player.teamId, list);
     }
-    return allPlayers.filter((player) => player.teamId === teamId);
-  }, [data?.players, teamId]);
+    return map;
+  }, [players, teamId]);
+
+  const sortedTeamIds = useMemo(
+    () =>
+      [...playersByTeam.keys()].sort((teamA, teamB) => {
+        const nameA = teamById.get(teamA)?.name ?? teamA;
+        const nameB = teamById.get(teamB)?.name ?? teamB;
+        return nameA.localeCompare(nameB, 'pt-BR');
+      }),
+    [playersByTeam, teamById],
+  );
+
+  const visiblePlayerCount = useMemo(
+    () => sortedTeamIds.reduce((total, id) => total + (playersByTeam.get(id)?.length ?? 0), 0),
+    [sortedTeamIds, playersByTeam],
+  );
 
   const { mutateAsync: createPlayer, isPending: isCreating } = useCreatePlayer({
     mutation: {
@@ -186,7 +203,8 @@ function PlayersPage() {
         <div>
           <h2 className="text-lg font-semibold">Jogadores</h2>
           <p className="text-muted-foreground text-sm">
-            {players.length} {players.length === 1 ? 'jogador' : 'jogadores'}
+            Elencos e estatísticas por time · {visiblePlayerCount}{' '}
+            {visiblePlayerCount === 1 ? 'jogador' : 'jogadores'}
           </p>
         </div>
 
@@ -231,7 +249,7 @@ function PlayersPage() {
 
       {teams.length > 0 && isPending && <ContentLoading variant="list" />}
 
-      {teams.length > 0 && !isPending && !isError && players.length === 0 && (
+      {teams.length > 0 && !isPending && !isError && visiblePlayerCount === 0 && (
         <EmptyState
           title="Nenhum jogador cadastrado"
           description={
@@ -248,79 +266,119 @@ function PlayersPage() {
         />
       )}
 
-      {teams.length > 0 && !isPending && !isError && players.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="w-20">Número</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead className="w-16 text-center">Gols</TableHead>
-              <TableHead className="w-28 text-center">Cartões</TableHead>
-              <TableHead className="w-24 text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {players.map((player) => (
-              <TableRow key={player.id}>
-                <TableCell className="font-medium">{player.name}</TableCell>
-                <TableCell>{player.shirtNumber ?? '—'}</TableCell>
-                <TableCell>{teamNameById.get(player.teamId) ?? '—'}</TableCell>
-                <TableCell className="text-center">
-                  {player.statistics?.goals ?? 0}
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className="text-yellow-500">{player.statistics?.yellowCards ?? 0}</span>
-                  <span className="text-muted-foreground mx-1">/</span>
-                  <span className="text-red-500">{player.statistics?.redCards ?? 0}</span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => openEditDialog(player)}
-                    >
-                      <PencilIcon className="size-4" />
-                      <span className="sr-only">Editar jogador</span>
-                    </Button>
+      {teams.length > 0 && !isPending && !isError && visiblePlayerCount > 0 && (
+        <div className="space-y-4">
+          {sortedTeamIds.map((currentTeamId) => {
+            const teamPlayers = playersByTeam.get(currentTeamId) ?? [];
+            const team = teamById.get(currentTeamId);
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8" disabled={isDeleting}>
-                          <Trash2Icon className="text-destructive size-4" />
-                          <span className="sr-only">Excluir jogador</span>
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir jogador?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            O jogador <strong>{player.name}</strong> será removido permanentemente.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            disabled={isDeleting}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              void handleDelete(player);
-                            }}
-                          >
-                            {isDeleting ? 'Excluindo…' : 'Excluir'}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            return (
+              <Card key={currentTeamId}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <TeamAvatar team={team} size="sm" />
+                    <span>{team?.name ?? 'Time'}</span>
+                    <span className="text-muted-foreground text-sm font-normal">
+                      ({teamPlayers.length})
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="overflow-x-auto p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10">Nº</TableHead>
+                        <TableHead>Jogador</TableHead>
+                        <TableHead className="text-center">J</TableHead>
+                        <TableHead className="text-center">G</TableHead>
+                        <TableHead className="text-center">A</TableHead>
+                        <TableHead className="text-center">🟨</TableHead>
+                        <TableHead className="text-center">🟥</TableHead>
+                        <TableHead className="text-center">MVP</TableHead>
+                        <TableHead className="w-24 text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...teamPlayers]
+                        .sort((a, b) => (a.shirtNumber ?? 999) - (b.shirtNumber ?? 999))
+                        .map((player) => {
+                          const stats = player.statistics;
+
+                          return (
+                            <TableRow key={player.id}>
+                              <TableCell className="text-muted-foreground">
+                                {player.shirtNumber ?? '—'}
+                              </TableCell>
+                              <TableCell className="font-medium">{player.name}</TableCell>
+                              <TableCell className="text-center">
+                                {stats?.matchesPlayed ?? 0}
+                              </TableCell>
+                              <TableCell className="text-center">{stats?.goals ?? 0}</TableCell>
+                              <TableCell className="text-center">{stats?.assists ?? 0}</TableCell>
+                              <TableCell className="text-center">
+                                {stats?.yellowCards ?? 0}
+                              </TableCell>
+                              <TableCell className="text-center">{stats?.redCards ?? 0}</TableCell>
+                              <TableCell className="text-center">{stats?.matchMvps ?? 0}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-8"
+                                    onClick={() => openEditDialog(player)}
+                                  >
+                                    <PencilIcon className="size-4" />
+                                    <span className="sr-only">Editar jogador</span>
+                                  </Button>
+
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-8"
+                                        disabled={isDeleting}
+                                      >
+                                        <Trash2Icon className="text-destructive size-4" />
+                                        <span className="sr-only">Excluir jogador</span>
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir jogador?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          O jogador <strong>{player.name}</strong> será removido
+                                          permanentemente.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          disabled={isDeleting}
+                                          onClick={(event) => {
+                                            event.preventDefault();
+                                            void handleDelete(player);
+                                          }}
+                                        >
+                                          {isDeleting ? 'Excluindo…' : 'Excluir'}
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>

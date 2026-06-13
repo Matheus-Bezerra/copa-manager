@@ -20,6 +20,7 @@ import { useCreateMatch } from '@/http/hooks/matches/use-create-match';
 import { useGetChampionshipStructure } from '@/http/hooks/stages/use-get-championship-structure';
 import { useFetchTeams } from '@/http/hooks/teams/use-fetch-teams';
 import { errorHandler } from '@/utils/error-handler';
+import { localDatetimeToIso } from '@/utils/datetime';
 import { z as zod } from '@/lib/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -121,7 +122,7 @@ function CreateMatchPage() {
         groupId: formData.groupId || null,
         homeTeamId: formData.homeTeamId || null,
         awayTeamId: formData.awayTeamId || null,
-        scheduledAt: formData.scheduledAt || null,
+        scheduledAt: formData.scheduledAt ? localDatetimeToIso(formData.scheduledAt) : null,
       },
     });
 

@@ -75,6 +75,7 @@ import type { Team } from '@/http/types/teams/team';
 import { z as zod } from '@/lib/zod';
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/utils/error-handler';
+import { isoToLocalDatetime, localDatetimeToIso } from '@/utils/datetime';
 import {
   capMatchElapsedSeconds,
   computeMatchElapsedSeconds,
@@ -112,11 +113,6 @@ function formatDate(iso: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function toDatetimeLocal(iso: string | null): string {
-  if (!iso) return '';
-  return iso.slice(0, 16);
 }
 
 const AUTO_MATCH_MINUTE_KEY = 'copaManager:autoMatchMinute';
@@ -208,7 +204,7 @@ function EditMatchDialog({
     defaultValues: {
       homeTeamId: match.homeTeamId ?? undefined,
       awayTeamId: match.awayTeamId ?? undefined,
-      scheduledAt: toDatetimeLocal(match.scheduledAt),
+      scheduledAt: isoToLocalDatetime(match.scheduledAt),
     },
   });
 
@@ -237,7 +233,7 @@ function EditMatchDialog({
       data: {
         homeTeamId: formData.homeTeamId || null,
         awayTeamId: formData.awayTeamId || null,
-        scheduledAt: formData.scheduledAt || null,
+        scheduledAt: formData.scheduledAt ? localDatetimeToIso(formData.scheduledAt) : null,
       },
     });
 
