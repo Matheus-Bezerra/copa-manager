@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -215,13 +215,7 @@ function TeamsPage() {
         </Button>
       </div>
 
-      {isPending && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-12 w-full" />
-          ))}
-        </div>
-      )}
+      {isPending && <ContentLoading variant="list" />}
 
       {!isPending && !isError && teams.length === 0 && (
         <EmptyState

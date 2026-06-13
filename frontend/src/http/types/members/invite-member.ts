@@ -7,4 +7,5 @@ export type InviteMemberBody = {
 
 export type InviteMemberResponse = {
   invitation: Invitation;
+  emailSent: boolean;
 };

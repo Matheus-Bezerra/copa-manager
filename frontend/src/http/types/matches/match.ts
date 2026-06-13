@@ -9,6 +9,8 @@ export type Match = {
   awayTeamId: string | null;
   scheduledAt: string | null;
   startedAt: string | null;
+  pausedAt: string | null;
+  accumulatedPausedMs: number;
   status: MatchStatus;
   createdAt: string;
   updatedAt: string;

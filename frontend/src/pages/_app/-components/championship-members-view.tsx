@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { AxiosError } from 'axios';
-import { Trash2Icon, UserPlusIcon } from 'lucide-react';
+import { CopyIcon, Trash2Icon, UserPlusIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -37,7 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -137,13 +137,7 @@ export function ChampionshipMembersView({
         )}
       </div>
 
-      {isPending && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-12 w-full" />
-          ))}
-        </div>
-      )}
+      {isPending && <ContentLoading variant="list" />}
 
       {!isPending && !isError && members.length === 0 && (
         <p className="text-muted-foreground py-8 text-center text-sm">Nenhum membro encontrado.</p>
@@ -309,6 +303,11 @@ type InviteMemberDialogProps = {
 
 function InviteMemberDialog({ open, onOpenChange, championshipId }: InviteMemberDialogProps) {
   const queryClient = useQueryClient();
+  const [inviteResult, setInviteResult] = useState<{
+    inviteUrl: string;
+    email: string;
+    emailSent: boolean;
+  } | null>(null);
 
   const {
     register,
@@ -346,35 +345,96 @@ function InviteMemberDialog({ open, onOpenChange, championshipId }: InviteMember
   });
 
   async function onSubmit(formData: InviteMemberFormData) {
-    await inviteMember({
+    const result = await inviteMember({
       championshipId,
       data: formData,
     });
 
     await queryClient.invalidateQueries({ queryKey: fetchMembersQueryKey(championshipId) });
-    toast.success('Convite enviado');
-    reset();
-    onOpenChange(false);
+
+    setInviteResult({
+      inviteUrl: result.invitation.inviteUrl,
+      email: formData.email,
+      emailSent: result.emailSent,
+    });
+
+    if (result.emailSent) {
+      toast.success('Convite criado', {
+        description: 'E-mail enviado. Você também pode copiar o link abaixo.',
+      });
+    } else {
+      toast.warning('Convite criado', {
+        description: 'O e-mail não foi enviado. Copie o link e compartilhe manualmente.',
+      });
+    }
+  }
+
+  async function handleCopyInviteUrl() {
+    if (!inviteResult) return;
+
+    try {
+      await navigator.clipboard.writeText(inviteResult.inviteUrl);
+      toast.success('Link copiado');
+    } catch {
+      toast.error('Não foi possível copiar o link');
+    }
   }
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen) {
       reset();
+      setInviteResult(null);
     }
     onOpenChange(nextOpen);
+  }
+
+  function handleCloseSuccess() {
+    reset();
+    setInviteResult(null);
+    onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Convidar membro</DialogTitle>
-          <DialogDescription>
-            Envie um convite por e-mail para adicionar um novo membro ao campeonato.
-          </DialogDescription>
-        </DialogHeader>
+        {inviteResult ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Convite criado</DialogTitle>
+              <DialogDescription>
+                {inviteResult.emailSent
+                  ? `Enviamos o convite para ${inviteResult.email}. Você também pode copiar o link e enviar por WhatsApp ou outro canal.`
+                  : `O e-mail para ${inviteResult.email} não foi enviado automaticamente. Copie o link abaixo e compartilhe manualmente.`}
+              </DialogDescription>
+            </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <div className="space-y-2">
+              <Label htmlFor="invite-link">Link do convite</Label>
+              <div className="flex gap-2">
+                <Input id="invite-link" readOnly value={inviteResult.inviteUrl} className="font-mono text-xs" />
+                <Button type="button" variant="outline" size="icon" onClick={handleCopyInviteUrl}>
+                  <CopyIcon className="size-4" />
+                  <span className="sr-only">Copiar link</span>
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="button" onClick={handleCloseSuccess}>
+                Concluir
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Convidar membro</DialogTitle>
+              <DialogDescription>
+                Envie um convite por e-mail e compartilhe o link por WhatsApp ou outro canal.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div className="space-y-1.5">
             <Label htmlFor="invite-email">E-mail</Label>
             <Input
@@ -415,6 +475,8 @@ function InviteMemberDialog({ open, onOpenChange, championshipId }: InviteMember
             </ButtonLoading>
           </div>
         </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import { useFetchMatches } from '@/http/hooks/matches/use-fetch-matches';
 import { useGetChampionshipStructure } from '@/http/hooks/stages/use-get-championship-structure';
 import { useFetchTeams } from '@/http/hooks/teams/use-fetch-teams';
@@ -207,13 +207,7 @@ function MatchesPage() {
         </Select>
       </div>
 
-      {isPending && (
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      )}
+      {isPending && <ContentLoading variant="list" rows={4} />}
 
       {!isPending && !isError && matches.length === 0 && (
         <EmptyState

@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import { useStandingsViewMode } from '@/hooks/use-standings-view-mode';
 import { useFetchMatches } from '@/http/hooks/matches/use-fetch-matches';
 import { useGetChampionshipStructure } from '@/http/hooks/stages/use-get-championship-structure';
@@ -110,12 +110,7 @@ function StandingsPage() {
   }
 
   if (structurePending) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-60 w-full rounded-lg" />
-      </div>
-    );
+    return <ContentLoading variant="page" label="Carregando classificação..." />;
   }
 
   if (!hasGroupStages && hasKnockoutStages) {
@@ -216,10 +211,8 @@ function StandingsPage() {
               </CardHeader>
               <CardContent className="p-0">
                 {standingsPending ? (
-                  <div className="space-y-2 p-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <Skeleton key={i} className="h-8 w-full" />
-                    ))}
+                  <div className="p-4">
+                    <ContentLoading variant="list" rows={4} label="Carregando tabela..." />
                   </div>
                 ) : standings.length === 0 ? (
                   <p className="text-muted-foreground p-4 text-sm">

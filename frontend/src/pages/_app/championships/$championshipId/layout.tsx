@@ -2,9 +2,9 @@ import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-r
 import { ArrowLeftIcon } from 'lucide-react';
 
 import { ChampionshipHorizontalNav } from '@/components/championship-horizontal-nav';
+import { ContentLoading } from '@/components/content-loading';
 import { SplashPage } from '@/components/splash-page';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   getChampionshipQueryOptions,
   useGetChampionship,
@@ -58,11 +58,7 @@ function ChampionshipLayout() {
         {/* Mini-stats */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {statsLoading ? (
-            <>
-              <Skeleton className="h-3.5 w-16" />
-              <Skeleton className="h-3.5 w-20" />
-              <Skeleton className="h-3.5 w-18" />
-            </>
+            <ContentLoading variant="inline" label="Carregando resumo..." />
           ) : (
             <>
               <span className="text-muted-foreground text-xs">

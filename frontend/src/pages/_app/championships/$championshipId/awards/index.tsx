@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -216,12 +216,7 @@ function AwardsPage() {
   const canGrant = isOwner || currentMember?.role === 'ADMINISTRATOR';
 
   if (isPending) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-60 w-full rounded-lg" />
-      </div>
-    );
+    return <ContentLoading variant="page" label="Carregando premiações..." />;
   }
 
   return (

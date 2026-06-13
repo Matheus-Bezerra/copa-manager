@@ -1,10 +1,12 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Loader2Icon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { acceptInvitation } from '@/http/hooks/members/use-accept-invitation';
 import { useAuthStore } from '@/stores/auth-store';
+import { buildInvitationAcceptRedirect } from '@/utils/invitation-redirect';
 import { errorHandler } from '@/utils/error-handler';
 
 type AcceptInvitationSearch = {
@@ -28,17 +30,7 @@ function AcceptInvitationPage() {
   const hasAttempted = useRef(false);
 
   useEffect(() => {
-    if (!token) {
-      return;
-    }
-
-    if (!isAuthenticated) {
-      void navigate({
-        to: '/sign-in',
-        search: {
-          redirect: `/invitations/accept?token=${encodeURIComponent(token)}`,
-        },
-      });
+    if (!token || !isAuthenticated) {
       return;
     }
 
@@ -74,6 +66,41 @@ function AcceptInvitationPage() {
             O link de convite está incompleto ou expirou. Solicite um novo convite ao organizador
             do campeonato.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    const redirect = buildInvitationAcceptRedirect(token);
+
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <div className="w-full max-w-sm space-y-6 rounded-xl border border-border/50 bg-card/80 p-6 shadow-lg backdrop-blur-sm">
+          <div className="space-y-2 text-center">
+            <img
+              src="/static/logo.png"
+              alt="Copa Manager"
+              className="mx-auto h-12 w-12"
+            />
+            <h1 className="text-xl font-semibold tracking-tight">Convite para campeonato</h1>
+            <p className="text-muted-foreground text-sm">
+              Entre com sua conta ou crie uma nova usando o mesmo e-mail que recebeu o convite.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Button asChild className="w-full">
+              <Link to="/sign-in" search={{ redirect }}>
+                Entrar
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/register" search={{ redirect }}>
+                Criar conta
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     );

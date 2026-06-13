@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   getGroupedChampionshipNavItems,
   isChampionshipNavActive,
@@ -28,7 +28,7 @@ export function ChampionshipSidebarNav({
     <div className="space-y-3">
       <div className="px-3">
         {championshipNameLoading ? (
-          <Skeleton className="h-4 w-full" />
+          <ContentLoading variant="inline" label="Carregando..." />
         ) : (
           <p className="truncate text-xs font-semibold text-sidebar-foreground" title={championshipName}>
             {championshipName}

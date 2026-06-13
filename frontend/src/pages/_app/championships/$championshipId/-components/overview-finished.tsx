@@ -3,7 +3,7 @@ import { AwardIcon, ExternalLinkIcon, TableIcon, TrophyIcon } from 'lucide-react
 
 import { TeamAvatar, TeamLabel } from '@/components/team-avatar';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -81,10 +81,8 @@ export function OverviewFinished({ championship }: OverviewFinishedProps) {
           </div>
 
           {standingsPending ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+            <div className="p-4">
+              <ContentLoading variant="list" rows={3} label="Carregando pódio..." />
             </div>
           ) : podium.length === 0 ? (
             <p className="text-muted-foreground p-4 text-sm">

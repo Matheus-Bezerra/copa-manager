@@ -10,7 +10,7 @@ import {
 import { TeamAvatar, TeamLabel } from '@/components/team-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -94,9 +94,8 @@ export function OverviewLive({ championship }: OverviewLiveProps) {
         </div>
 
         {livePending ? (
-          <div className="space-y-2 p-4">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+          <div className="p-4">
+            <ContentLoading variant="list" rows={2} label="Carregando partidas ao vivo..." />
           </div>
         ) : liveMatches.length === 0 ? (
           <p className="text-muted-foreground p-4 text-sm">Nenhuma partida ao vivo agora.</p>
@@ -153,10 +152,8 @@ export function OverviewLive({ championship }: OverviewLiveProps) {
         </div>
 
         {scheduledPending ? (
-          <div className="space-y-2 p-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+          <div className="p-4">
+            <ContentLoading variant="list" rows={3} label="Carregando agenda..." />
           </div>
         ) : upcomingMatches.length === 0 ? (
           <p className="text-muted-foreground p-4 text-sm">
@@ -219,10 +216,8 @@ export function OverviewLive({ championship }: OverviewLiveProps) {
           </div>
 
           {standingsPending ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
+            <div className="p-4">
+              <ContentLoading variant="list" rows={4} label="Carregando classificação..." />
             </div>
           ) : standings.length === 0 ? (
             <p className="text-muted-foreground p-4 text-sm">

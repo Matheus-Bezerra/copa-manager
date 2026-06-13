@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   fetchStagesQueryKey,
 } from '@/http/hooks/stages/use-fetch-stages';
@@ -226,13 +226,7 @@ function StructurePage() {
         </Button>
       </div>
 
-      {isPending && (
-        <div className="space-y-3">
-          {Array.from({ length: 2 }).map((_, index) => (
-            <Skeleton key={index} className="h-36 w-full rounded-lg" />
-          ))}
-        </div>
-      )}
+      {isPending && <ContentLoading variant="page" label="Carregando estrutura..." />}
 
       {!isPending && !isError && !hasStructure && (
         <EmptyState

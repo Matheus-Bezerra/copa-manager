@@ -1,8 +1,11 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
+import { SupportContactLink } from '@/components/support-contact-link';
+import { useAuthStore } from '@/stores/auth-store';
+
 export const Route = createFileRoute('/_auth')({
-  beforeLoad: ({ context: { auth } }) => {
-    if (auth?.isAuthenticated) {
+  beforeLoad: () => {
+    if (useAuthStore.getState().isAuthenticated) {
       throw redirect({ to: '/' });
     }
   },
@@ -32,6 +35,8 @@ function AuthLayout() {
 
         <Outlet />
       </div>
+
+      <SupportContactLink variant="auth" />
     </div>
   );
 }

@@ -27,7 +27,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2Icon } from 'lucide-react';
+import { ContentLoading } from '@/components/content-loading';
 import { fetchChampionshipsQueryKey } from '@/http/hooks/championships/use-fetch-championships';
 import { getChampionshipQueryKey } from '@/http/hooks/championships/use-get-championship';
 import { useUpdateChampionship } from '@/http/hooks/championships/use-update-championship';
@@ -199,7 +200,7 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
         <div className="mb-1 flex items-center justify-between gap-2">
           <p className="text-sm font-medium">Monte sua copa</p>
           {isLoading ? (
-            <Skeleton className="h-4 w-16" />
+            <ContentLoading variant="inline" label="Carregando..." />
           ) : (
             <span className="text-muted-foreground text-xs">
               {completedCount}/{steps.length} concluídos
@@ -231,7 +232,7 @@ export function OverviewSetup({ championship }: OverviewSetupProps) {
               >
                 <div className="flex size-7 shrink-0 items-center justify-center">
                   {isLoading && !isPast ? (
-                    <Skeleton className="size-5 rounded-full" />
+                    <Loader2Icon className="text-muted-foreground size-5 animate-spin" />
                   ) : isPast ? (
                     <CheckCircle2Icon className="size-5 text-primary" />
                   ) : isCurrent ? (

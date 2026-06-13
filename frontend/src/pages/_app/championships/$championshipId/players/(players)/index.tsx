@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import {
   Table,
   TableBody,
@@ -229,13 +229,7 @@ function PlayersPage() {
         />
       )}
 
-      {teams.length > 0 && isPending && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-12 w-full" />
-          ))}
-        </div>
-      )}
+      {teams.length > 0 && isPending && <ContentLoading variant="list" />}
 
       {teams.length > 0 && !isPending && !isError && players.length === 0 && (
         <EmptyState

@@ -42,6 +42,20 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = [];
 }
 
+const AUTH_ROUTES_WITHOUT_TOKEN_REFRESH = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/refresh',
+] as const;
+
+function shouldSkipTokenRefresh(url?: string) {
+  if (!url) return false;
+
+  return AUTH_ROUTES_WITHOUT_TOKEN_REFRESH.some((route) => url.includes(route));
+}
+
 axiosInstance.interceptors.request.use((config) => {
   const { accessToken } = useAuthStore.getState();
 
@@ -58,6 +72,10 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (shouldSkipTokenRefresh(originalRequest.url)) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });

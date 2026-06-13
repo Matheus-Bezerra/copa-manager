@@ -32,6 +32,7 @@ export * from './hooks/matches/use-get-match';
 export * from './hooks/matches/use-create-match';
 export * from './hooks/matches/use-update-match';
 export * from './hooks/matches/use-update-match-status';
+export * from './hooks/matches/use-update-match-timer';
 export * from './hooks/matches/use-register-match-result';
 export * from './hooks/match-events/use-fetch-match-events';
 export * from './hooks/match-events/use-register-goal';

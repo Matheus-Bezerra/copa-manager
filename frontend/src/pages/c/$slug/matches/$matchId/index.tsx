@@ -21,6 +21,11 @@ import { useFetchPublicPlayers } from '@/http/hooks/public/use-fetch-public-play
 import type { MatchEvent } from '@/http/types/match-events/match-event';
 import type { MatchStatus } from '@/http/types/matches/match';
 import { cn } from '@/lib/utils';
+import {
+  capMatchElapsedSeconds,
+  computeMatchElapsedSeconds,
+  isMatchTimerPaused,
+} from '@/utils/match-timer';
 
 export const Route = createFileRoute('/c/$slug/matches/$matchId/')({
   component: PublicMatchDetailPage,
@@ -94,6 +99,7 @@ function PublicMatchDetailPage() {
 
   const match = matchData?.match;
   const result = matchData?.result;
+  const matchDurationMinutes = matchData?.matchDuration ?? 90;
   const events = eventsData?.events ?? [];
   const teamNameById = buildPublicTeamNameMap(teamsData?.teams ?? []);
   const playerNameById = new Map(
@@ -114,21 +120,47 @@ function PublicMatchDetailPage() {
   const awayTeam = teamsData?.teams.find((team) => team.id === match?.awayTeamId);
 
   useEffect(() => {
-    if (match?.status === 'IN_PROGRESS' && match.startedAt) {
-      const startedMs = new Date(match.startedAt).getTime();
-      const computeElapsed = () => Math.floor((Date.now() - startedMs) / 1000);
-      setElapsedSeconds(computeElapsed());
-      timerRef.current = setInterval(() => {
-        setElapsedSeconds(computeElapsed());
-      }, 1000);
-
-      return () => {
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-      };
+    if (match?.status !== 'IN_PROGRESS' || !match.startedAt) {
+      return;
     }
-  }, [match?.status, match?.startedAt]);
+
+    const timerState = {
+      startedAt: match.startedAt,
+      pausedAt: match.pausedAt,
+      accumulatedPausedMs: match.accumulatedPausedMs,
+    };
+    const totalSeconds = matchDurationMinutes * 60;
+
+    const tick = () => {
+      setElapsedSeconds(
+        capMatchElapsedSeconds(computeMatchElapsedSeconds(timerState), totalSeconds),
+      );
+    };
+
+    tick();
+
+    if (isMatchTimerPaused(timerState)) {
+      return;
+    }
+
+    if (computeMatchElapsedSeconds(timerState) >= totalSeconds) {
+      return;
+    }
+
+    timerRef.current = setInterval(tick, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [
+    match?.status,
+    match?.startedAt,
+    match?.pausedAt,
+    match?.accumulatedPausedMs,
+    matchDurationMinutes,
+  ]);
 
   if (isPending) {
     return (
@@ -155,9 +187,10 @@ function PublicMatchDetailPage() {
 
   const isInProgress = match.status === 'IN_PROGRESS';
   const isFinished = match.status === 'FINISHED';
-  const matchDurationMinutes = 90;
   const totalSeconds = matchDurationMinutes * 60;
-  const isOvertime = elapsedSeconds > totalSeconds;
+  const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+  const isTimerPaused = isMatchTimerPaused(match);
+  const isTimerFinished = elapsedSeconds >= totalSeconds;
 
   return (
     <div className="space-y-6">
@@ -176,20 +209,27 @@ function PublicMatchDetailPage() {
               <div
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums',
-                  isOvertime
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-primary/10 text-primary',
+                  isTimerPaused
+                    ? 'bg-muted text-muted-foreground'
+                    : isTimerFinished
+                      ? 'bg-secondary text-secondary-foreground'
+                      : 'bg-primary/10 text-primary',
                 )}
               >
-                {isOvertime ? (
+                {isTimerPaused ? (
                   <>
-                    <RadioIcon className="size-3.5 animate-pulse" />+
-                    {formatMatchTime(elapsedSeconds - totalSeconds)}
+                    <TimerIcon className="size-3.5" />
+                    Pausado
+                  </>
+                ) : isTimerFinished ? (
+                  <>
+                    <TimerIcon className="size-3.5" />
+                    Tempo esgotado
                   </>
                 ) : (
                   <>
-                    <TimerIcon className="size-3.5" />
-                    {formatMatchTime(elapsedSeconds)}
+                    <RadioIcon className="size-3.5 animate-pulse" />
+                    {formatMatchTime(remainingSeconds)}
                   </>
                 )}
               </div>
@@ -226,8 +266,8 @@ function PublicMatchDetailPage() {
               )}
               {isInProgress && (
                 <p className="text-destructive mt-1 flex items-center justify-center gap-1 text-xs font-medium">
-                  <RadioIcon className="size-3 animate-pulse" />
-                  Ao vivo
+                  <RadioIcon className={cn('size-3', !isTimerPaused && !isTimerFinished && 'animate-pulse')} />
+                  {isTimerPaused ? 'Pausado' : isTimerFinished ? 'Tempo esgotado' : 'Ao vivo'}
                 </p>
               )}
             </div>

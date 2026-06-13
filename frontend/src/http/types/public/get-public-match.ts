@@ -9,4 +9,5 @@ export type GetPublicMatchParams = {
 export type GetPublicMatchResponse = {
   match: Match;
   result: MatchResult | null;
+  matchDuration: number;
 };

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 
 import { AppUserMenu } from '@/components/app-user-menu';
 import { ChampionshipSidebarNav } from '@/components/championship-sidebar-nav';
+import { SupportContactLink } from '@/components/support-contact-link';
 import { SplashPage } from '@/components/splash-page';
 import { getChampionshipIdFromPath } from '@/constants/championship-nav';
 import { appNav } from '@/constants/nav';
@@ -20,8 +21,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_app')({
-  beforeLoad: ({ context: { auth } }) => {
-    if (!auth?.isAuthenticated) {
+  beforeLoad: () => {
+    if (!useAuthStore.getState().isAuthenticated) {
       throw redirect({ to: '/sign-in' });
     }
   },
@@ -191,11 +192,14 @@ function AppLayout() {
           </div>
 
           {user && (
-            <AppUserMenu
-              user={user}
-              variant="header"
-              onNavigate={() => setMobileOpen(false)}
-            />
+            <div className="flex items-center gap-1">
+              <SupportContactLink variant="icon" />
+              <AppUserMenu
+                user={user}
+                variant="header"
+                onNavigate={() => setMobileOpen(false)}
+              />
+            </div>
           )}
         </header>
 

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
@@ -12,7 +12,10 @@ import { Label } from '@/components/ui/label';
 import { useRegister } from '@/http/hooks/auth/use-register';
 import { z as zod } from '@/lib/zod';
 import { useAuthStore } from '@/stores/auth-store';
+import { followAuthRedirect } from '@/utils/invitation-redirect';
 import { errorHandler } from '@/utils/error-handler';
+
+const registerRouteApi = getRouteApi('/_auth/register/');
 
 const registerSchema = zod
   .object({
@@ -30,6 +33,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const navigate = useNavigate();
+  const { redirect } = registerRouteApi.useSearch();
   const { login } = useAuthStore();
 
   const {
@@ -52,6 +56,11 @@ export function RegisterForm() {
   async function onSubmit({ name, email, password }: RegisterFormData) {
     const result = await createAccount({ data: { name, email, password } });
     login(result.user, result.accessToken, result.refreshToken);
+
+    if (followAuthRedirect(redirect)) {
+      return;
+    }
+
     navigate({ to: '/' });
   }
 

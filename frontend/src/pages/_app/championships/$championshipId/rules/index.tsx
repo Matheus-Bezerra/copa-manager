@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import { useFetchMembers } from '@/http/hooks/members/use-fetch-members';
 import { getChampionshipRulesQueryKey, useGetChampionshipRules } from '@/http/hooks/rules/use-get-championship-rules';
 import { useUpdateChampionshipRules } from '@/http/hooks/rules/use-update-championship-rules';
@@ -227,12 +227,7 @@ function RulesPage() {
   const availableCriteria = ALL_CRITERIA.filter((c) => !usedCriteria.has(c));
 
   if (rulesPending || tieBreakerPending) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-60 w-full rounded-lg" />
-      </div>
-    );
+    return <ContentLoading variant="page" label="Carregando regras..." />;
   }
 
   return (

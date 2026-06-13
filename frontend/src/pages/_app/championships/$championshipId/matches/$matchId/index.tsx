@@ -3,7 +3,9 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ArrowLeftIcon,
   CalendarIcon,
+  PauseIcon,
   PencilIcon,
+  PlayIcon,
   StarIcon,
   TimerIcon,
   TrophyIcon,
@@ -48,7 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ContentLoading } from '@/components/content-loading';
 import { fetchMatchEventsQueryKey, useFetchMatchEvents } from '@/http/hooks/match-events/use-fetch-match-events';
 import { useRegisterGoal } from '@/http/hooks/match-events/use-register-goal';
 import { useRegisterYellowCard } from '@/http/hooks/match-events/use-register-yellow-card';
@@ -56,9 +58,11 @@ import { useRegisterRedCard } from '@/http/hooks/match-events/use-register-red-c
 import { fetchAwardsQueryKey } from '@/http/hooks/awards/use-fetch-awards';
 import { useDefineMatchMvp } from '@/http/hooks/match-events/use-define-match-mvp';
 import { invalidateMatchesQueries } from '@/http/hooks/matches/use-fetch-matches';
+import { invalidateStandingsQueries } from '@/http/hooks/standings/use-get-standings';
 import { getMatchQueryKey, useGetMatch } from '@/http/hooks/matches/use-get-match';
 import { useUpdateMatch } from '@/http/hooks/matches/use-update-match';
 import { useUpdateMatchStatus } from '@/http/hooks/matches/use-update-match-status';
+import { useUpdateMatchTimer } from '@/http/hooks/matches/use-update-match-timer';
 import { useRegisterMatchResult } from '@/http/hooks/matches/use-register-match-result';
 import { useGetChampionshipRules } from '@/http/hooks/rules/use-get-championship-rules';
 import { fetchPlayersQueryKey } from '@/http/hooks/players/use-fetch-players';
@@ -71,6 +75,11 @@ import type { Team } from '@/http/types/teams/team';
 import { z as zod } from '@/lib/zod';
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/utils/error-handler';
+import {
+  capMatchElapsedSeconds,
+  computeMatchElapsedSeconds,
+  isMatchTimerPaused,
+} from '@/utils/match-timer';
 
 export const Route = createFileRoute(
   '/_app/championships/$championshipId/matches/$matchId/',
@@ -552,12 +561,46 @@ function EventDialog({
 
 /* ——— Register Result Dialog ——— */
 
-const resultFormSchema = zod.object({
-  homeScore: zod.string().regex(/^\d+$/, 'Valor inválido'),
-  awayScore: zod.string().regex(/^\d+$/, 'Valor inválido'),
-  homePenaltyScore: zod.string().optional(),
-  awayPenaltyScore: zod.string().optional(),
-});
+const resultFormSchema = zod
+  .object({
+    homeScore: zod.string().regex(/^\d+$/, 'Valor inválido'),
+    awayScore: zod.string().regex(/^\d+$/, 'Valor inválido'),
+    homePenaltyScore: zod.string().optional(),
+    awayPenaltyScore: zod.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const homeScore = Number(data.homeScore);
+    const awayScore = Number(data.awayScore);
+
+    if (homeScore !== awayScore) {
+      return;
+    }
+
+    const homePenalty = data.homePenaltyScore?.trim() ?? '';
+    const awayPenalty = data.awayPenaltyScore?.trim() ?? '';
+    const hasHomePenalty = homePenalty !== '';
+    const hasAwayPenalty = awayPenalty !== '';
+
+    if (hasHomePenalty === hasAwayPenalty) {
+      return;
+    }
+
+    if (!hasHomePenalty) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe os pênaltis do mandante',
+        path: ['homePenaltyScore'],
+      });
+    }
+
+    if (!hasAwayPenalty) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe os pênaltis do visitante',
+        path: ['awayPenaltyScore'],
+      });
+    }
+  });
 
 type ResultFormData = z.infer<typeof resultFormSchema>;
 
@@ -589,7 +632,13 @@ function RegisterResultDialog({
   const queryClient = useQueryClient();
   const [scorers, setScorers] = useState<Record<string, string>>({});
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<ResultFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ResultFormData>({
     resolver: zodResolver(resultFormSchema),
     defaultValues: {
       homeScore: String(existingHomeGoals),
@@ -603,6 +652,8 @@ function RegisterResultDialog({
   const watchedAwayScore = watch('awayScore');
   const finalHomeGoals = Number(watchedHomeScore) || 0;
   const finalAwayGoals = Number(watchedAwayScore) || 0;
+  const isDraw =
+    watchedHomeScore !== '' && watchedAwayScore !== '' && finalHomeGoals === finalAwayGoals;
   const extraHomeGoals = Math.max(0, finalHomeGoals - existingHomeGoals);
   const extraAwayGoals = Math.max(0, finalAwayGoals - existingAwayGoals);
 
@@ -650,6 +701,13 @@ function RegisterResultDialog({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!isDraw) {
+      setValue('homePenaltyScore', '');
+      setValue('awayPenaltyScore', '');
+    }
+  }, [isDraw, setValue]);
+
   const { mutateAsync: registerGoal } = useRegisterGoal();
   const { mutateAsync: registerResult } = useRegisterMatchResult();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -675,14 +733,20 @@ function RegisterResultDialog({
         });
       }
 
+      const homePenalty = formData.homePenaltyScore?.trim() ?? '';
+      const awayPenalty = formData.awayPenaltyScore?.trim() ?? '';
+      const isResultDraw = Number(formData.homeScore) === Number(formData.awayScore);
+
       await registerResult({
         championshipId,
         matchId: match.id,
         data: {
           homeScore: Number(formData.homeScore),
           awayScore: Number(formData.awayScore),
-          homePenaltyScore: formData.homePenaltyScore ? Number(formData.homePenaltyScore) : null,
-          awayPenaltyScore: formData.awayPenaltyScore ? Number(formData.awayPenaltyScore) : null,
+          homePenaltyScore:
+            isResultDraw && homePenalty !== '' ? Number(homePenalty) : null,
+          awayPenaltyScore:
+            isResultDraw && awayPenalty !== '' ? Number(awayPenalty) : null,
         },
       });
 
@@ -692,6 +756,7 @@ function RegisterResultDialog({
       });
       await queryClient.invalidateQueries({ queryKey: fetchPlayersQueryKey(championshipId) });
       await invalidateMatchesQueries(queryClient, championshipId);
+      await invalidateStandingsQueries(queryClient, championshipId);
 
       toast.success('Partida encerrada com sucesso');
       onClose();
@@ -710,7 +775,7 @@ function RegisterResultDialog({
           <DialogTitle>Encerrar partida</DialogTitle>
           <DialogDescription>
             Informe o placar final. Você pode indicar quem marcou cada gol — o jogador é opcional.
-            Os pênaltis também são opcionais.
+            Em caso de empate, os pênaltis são opcionais; se informar um lado, informe os dois.
           </DialogDescription>
         </DialogHeader>
 
@@ -770,19 +835,40 @@ function RegisterResultDialog({
             </>
           )}
 
-          <Separator />
-
-          <p className="text-muted-foreground text-sm">Pênaltis (opcional)</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="homePenaltyScore">Pênaltis mandante</Label>
-              <Input id="homePenaltyScore" type="number" min={0} {...register('homePenaltyScore')} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="awayPenaltyScore">Pênaltis visitante</Label>
-              <Input id="awayPenaltyScore" type="number" min={0} {...register('awayPenaltyScore')} />
-            </div>
-          </div>
+          {isDraw && (
+            <>
+              <Separator />
+              <p className="text-muted-foreground text-sm">
+                Pênaltis (opcional — se informar um time, informe os dois)
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="homePenaltyScore">Pênaltis mandante</Label>
+                  <Input
+                    id="homePenaltyScore"
+                    type="number"
+                    min={0}
+                    {...register('homePenaltyScore')}
+                  />
+                  {errors.homePenaltyScore && (
+                    <p className="text-destructive text-xs">{errors.homePenaltyScore.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="awayPenaltyScore">Pênaltis visitante</Label>
+                  <Input
+                    id="awayPenaltyScore"
+                    type="number"
+                    min={0}
+                    {...register('awayPenaltyScore')}
+                  />
+                  {errors.awayPenaltyScore && (
+                    <p className="text-destructive text-xs">{errors.awayPenaltyScore.message}</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>
@@ -944,17 +1030,46 @@ function MatchDetailPage() {
   const mvpPlayer = mvpPlayerId ? playerById.get(mvpPlayerId) : undefined;
 
   useEffect(() => {
-    if (match?.status === 'IN_PROGRESS' && match.startedAt) {
-      const startedMs = new Date(match.startedAt).getTime();
-      const computeElapsed = () => Math.floor((Date.now() - startedMs) / 1000);
-      timerRef.current = setInterval(() => {
-        setElapsedSeconds(computeElapsed());
-      }, 1000);
-      return () => {
-        if (timerRef.current) clearInterval(timerRef.current);
-      };
+    if (match?.status !== 'IN_PROGRESS' || !match.startedAt) {
+      return;
     }
-  }, [match?.status, match?.startedAt]);
+
+    const timerState = {
+      startedAt: match.startedAt,
+      pausedAt: match.pausedAt,
+      accumulatedPausedMs: match.accumulatedPausedMs,
+    };
+
+    const tick = () => {
+      const elapsed = capMatchElapsedSeconds(
+        computeMatchElapsedSeconds(timerState),
+        matchDuration * 60,
+      );
+      setElapsedSeconds(elapsed);
+    };
+
+    tick();
+
+    if (isMatchTimerPaused(timerState)) {
+      return;
+    }
+
+    const totalSeconds = matchDuration * 60;
+    if (computeMatchElapsedSeconds(timerState) >= totalSeconds) {
+      return;
+    }
+
+    timerRef.current = setInterval(tick, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [
+    match?.status,
+    match?.startedAt,
+    match?.pausedAt,
+    match?.accumulatedPausedMs,
+    matchDuration,
+  ]);
 
   const { mutateAsync: updateStatus, isPending: pendingStatus } = useUpdateMatchStatus({
     mutation: {
@@ -967,6 +1082,15 @@ function MatchDetailPage() {
           });
           return;
         }
+        const { code, description } = errorHandler(error);
+        toast.error(code, { description });
+      },
+    },
+  });
+
+  const { mutateAsync: updateTimer, isPending: pendingTimer } = useUpdateMatchTimer({
+    mutation: {
+      onError: (error) => {
         const { code, description } = errorHandler(error);
         toast.error(code, { description });
       },
@@ -989,11 +1113,22 @@ function MatchDetailPage() {
     setCancelOpen(false);
   }
 
+  async function handlePauseTimer() {
+    if (!match) return;
+    await updateTimer({ championshipId, matchId: match.id, data: { action: 'PAUSE' } });
+    await queryClient.invalidateQueries({ queryKey: getMatchQueryKey(championshipId, match.id) });
+  }
+
+  async function handleResumeTimer() {
+    if (!match) return;
+    await updateTimer({ championshipId, matchId: match.id, data: { action: 'RESUME' } });
+    await queryClient.invalidateQueries({ queryKey: getMatchQueryKey(championshipId, match.id) });
+  }
+
   if (isPending) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40 w-full rounded-lg" />
+        <ContentLoading variant="page" label="Carregando partida..." />
       </div>
     );
   }
@@ -1020,10 +1155,10 @@ function MatchDetailPage() {
 
   const totalSeconds = matchDuration * 60;
   const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
-  const overtimeSeconds = Math.max(0, elapsedSeconds - totalSeconds);
-  const isOvertime = elapsedSeconds > totalSeconds;
-  const progressPercent = Math.min(100, (elapsedSeconds / totalSeconds) * 100);
+  const progressPercent = totalSeconds > 0 ? (elapsedSeconds / totalSeconds) * 100 : 0;
   const currentMinute = Math.floor(elapsedSeconds / 60);
+  const isTimerPaused = isMatchTimerPaused(match);
+  const isTimerFinished = elapsedSeconds >= totalSeconds;
 
   const homeColor = homeTeam?.primaryColor ?? '#6b7280';
   const awayColor = awayTeam?.primaryColor ?? '#6b7280';
@@ -1079,10 +1214,18 @@ function MatchDetailPage() {
             {isInProgress && (
               <div className={cn(
                 'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tabular-nums',
-                isOvertime ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary',
+                isTimerPaused
+                  ? 'bg-muted text-muted-foreground'
+                  : isTimerFinished
+                    ? 'bg-secondary text-secondary-foreground'
+                    : 'bg-primary/10 text-primary',
               )}>
                 <TimerIcon className="size-3.5" />
-                {isOvertime ? `+${formatMatchTime(overtimeSeconds)}` : `${formatMatchTime(remainingSeconds)} restantes`}
+                {isTimerPaused
+                  ? 'Pausado'
+                  : isTimerFinished
+                    ? 'Tempo esgotado'
+                    : `${formatMatchTime(remainingSeconds)} restantes`}
               </div>
             )}
           </div>
@@ -1121,9 +1264,13 @@ function MatchDetailPage() {
                 <div className="flex w-full flex-col items-center gap-1.5">
                   <p className={cn(
                     'text-3xl font-bold tabular-nums tracking-tight',
-                    isOvertime ? 'text-destructive' : 'text-primary',
+                    isTimerPaused
+                      ? 'text-muted-foreground'
+                      : isTimerFinished
+                        ? 'text-secondary-foreground'
+                        : 'text-primary',
                   )}>
-                    {isOvertime ? `+${formatMatchTime(overtimeSeconds)}` : formatMatchTime(remainingSeconds)}
+                    {formatMatchTime(remainingSeconds)}
                   </p>
                   <p className="text-muted-foreground text-xs tabular-nums">
                     {formatMatchTime(elapsedSeconds)} decorridos
@@ -1132,14 +1279,39 @@ function MatchDetailPage() {
                     <div
                       className={cn(
                         'h-full rounded-full transition-all duration-1000',
-                        isOvertime ? 'bg-destructive' : 'bg-primary',
+                        isTimerPaused ? 'bg-muted-foreground/50' : 'bg-primary',
                       )}
-                      style={{ width: `${progressPercent}%` }}
+                      style={{ width: `${Math.min(100, progressPercent)}%` }}
                     />
                   </div>
                   <p className="text-muted-foreground text-xs tabular-nums">
                     {formatMatchTime(totalSeconds)} total
                   </p>
+                  <div className="flex gap-2 pt-1">
+                    {isTimerPaused ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={handleResumeTimer}
+                        disabled={pendingTimer || isTimerFinished}
+                      >
+                        <PlayIcon className="size-4" />
+                        Prosseguir
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={handlePauseTimer}
+                        disabled={pendingTimer || isTimerFinished}
+                      >
+                        <PauseIcon className="size-4" />
+                        Pausar
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 

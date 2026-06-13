@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useLogin } from '@/http/hooks/auth/use-login';
 import { z as zod } from '@/lib/zod';
 import { useAuthStore } from '@/stores/auth-store';
+import { followAuthRedirect } from '@/utils/invitation-redirect';
 import { errorHandler } from '@/utils/error-handler';
 
 const signInRouteApi = getRouteApi('/_auth/sign-in/');
@@ -49,8 +50,7 @@ export function SignInForm() {
     const result = await signIn({ data: formData });
     login(result.user, result.accessToken, result.refreshToken);
 
-    if (redirect?.startsWith('/')) {
-      window.location.href = redirect;
+    if (followAuthRedirect(redirect)) {
       return;
     }
 

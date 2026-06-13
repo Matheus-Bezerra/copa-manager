@@ -1,4 +1,4 @@
-import type { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
+import type { QueryClient, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import type { ResponseErrorConfig } from '../../client';
@@ -7,10 +7,12 @@ import type { ApiErrorPayload } from '../../types/api-error';
 import type { GetStandingsParams, GetStandingsResponse } from '../../types/standings/get-standings';
 import type { StandingEntry } from '../../types/standings/standings';
 
+const STANDINGS_LIST_URL = '/championships/:championshipId/standings';
+
 export const getStandingsQueryKey = (params: GetStandingsParams) =>
   [
     {
-      url: '/championships/:championshipId/standings',
+      url: STANDINGS_LIST_URL,
       championshipId: params.championshipId,
       stageId: params.stageId,
       groupId: params.groupId,
@@ -18,6 +20,29 @@ export const getStandingsQueryKey = (params: GetStandingsParams) =>
   ] as const;
 
 export type GetStandingsQueryKey = ReturnType<typeof getStandingsQueryKey>;
+
+export function isGetStandingsQueryKey(
+  queryKey: readonly unknown[],
+  championshipId: string,
+): boolean {
+  const first = queryKey[0];
+
+  return (
+    typeof first === 'object' &&
+    first !== null &&
+    'url' in first &&
+    first.url === STANDINGS_LIST_URL &&
+    'championshipId' in first &&
+    first.championshipId === championshipId
+  );
+}
+
+export function invalidateStandingsQueries(queryClient: QueryClient, championshipId: string) {
+  return queryClient.invalidateQueries({
+    predicate: (query) => isGetStandingsQueryKey(query.queryKey, championshipId),
+    refetchType: 'all',
+  });
+}
 
 export async function getStandings(params: GetStandingsParams): Promise<GetStandingsResponse> {
   const res = await client<StandingEntry[]>({
