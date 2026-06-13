@@ -29,14 +29,14 @@ export async function inviteMemberController(request: FastifyRequest, reply: Fas
       new ResendEmailService()
     );
 
-    const { invitation } = await inviteMemberUseCase.execute({
+    const { invitation, emailSent } = await inviteMemberUseCase.execute({
       userId,
       championshipId,
       email,
       role,
     });
 
-    return reply.status(201).send({ data: { invitation } });
+    return reply.status(201).send({ data: { invitation, emailSent } });
   } catch (err) {
     logger.error('Invite member error', err);
     const { statusCode, code, message } = formatError(err);

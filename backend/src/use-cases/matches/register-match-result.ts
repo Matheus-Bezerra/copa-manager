@@ -16,6 +16,7 @@ import type { PlayerRepository } from '@/repositories/player-repository'
 import type { PlayerStatisticsRepository } from '@/repositories/player-statistics-repository'
 import { incrementMatchesPlayedOnMatchFinished } from '@/services/competition/increment-matches-played-on-match-finished'
 import { ProcessMatchFinishedUseCase } from '@/use-cases/matches/process-match-finished'
+import { normalizeMatchPenaltyScores } from '@/utils/validators/normalize-match-penalty-scores'
 
 export interface RegisterMatchResultUseCaseRequest {
   championshipId: string
@@ -70,6 +71,21 @@ export class RegisterMatchResultUseCase {
       throw errorMessage.matchInvalidScore
     }
 
+    const { homePenaltyScore, awayPenaltyScore } = normalizeMatchPenaltyScores({
+      homeScore: request.homeScore,
+      awayScore: request.awayScore,
+      homePenaltyScore: request.homePenaltyScore,
+      awayPenaltyScore: request.awayPenaltyScore,
+    })
+
+    const round = await this.roundRepository.findById(match.roundId)
+    const stage = round ? await this.stageRepository.findById(round.stageId) : null
+    const isDraw = request.homeScore === request.awayScore
+
+    if (stage?.type === 'KNOCKOUT' && isDraw && homePenaltyScore === null) {
+      throw errorMessage.matchKnockoutDrawRequiresPenalties
+    }
+
     const existingResult = await this.matchResultRepository.findByMatchId(request.matchId)
 
     const result = await this.matchResultRepository.upsert({
@@ -77,8 +93,8 @@ export class RegisterMatchResultUseCase {
       matchId: request.matchId,
       homeScore: request.homeScore,
       awayScore: request.awayScore,
-      homePenaltyScore: request.homePenaltyScore ?? null,
-      awayPenaltyScore: request.awayPenaltyScore ?? null,
+      homePenaltyScore,
+      awayPenaltyScore,
     })
 
     const isFirstFinish = match.status !== 'FINISHED'
@@ -93,9 +109,6 @@ export class RegisterMatchResultUseCase {
         this.playerStatisticsRepository,
       )
     }
-
-    const round = await this.roundRepository.findById(match.roundId)
-    const stage = round ? await this.stageRepository.findById(round.stageId) : null
 
     if (match.groupId && stage?.type === 'GROUP_STAGE') {
       const recalculateStandingsUseCase = new RecalculateStandingsUseCase(

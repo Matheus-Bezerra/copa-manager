@@ -6,6 +6,7 @@ import { championshipRoleSchema, invitationSchema } from './member.schema';
 const inviteMemberResponseSchema = z.object({
   data: z.object({
     invitation: invitationSchema,
+    emailSent: z.boolean(),
   }),
 });
 

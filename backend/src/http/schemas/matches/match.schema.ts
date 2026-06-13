@@ -11,6 +11,8 @@ export const matchSchema = z.object({
   awayTeamId: z.string().nullable(),
   scheduledAt: z.coerce.date().nullable(),
   startedAt: z.coerce.date().nullable(),
+  pausedAt: z.coerce.date().nullable(),
+  accumulatedPausedMs: z.number().int(),
   status: matchStatusSchema,
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),

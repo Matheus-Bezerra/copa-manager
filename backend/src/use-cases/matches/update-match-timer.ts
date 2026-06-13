@@ -2,19 +2,19 @@ import { errorMessage } from '@/constants/error-message'
 import type { ChampionshipRepository } from '@/repositories/championship-repository'
 import type { Match, MatchRepository } from '@/repositories/match-repository'
 
-export interface UpdateMatchStatusUseCaseRequest {
+export interface UpdateMatchTimerUseCaseRequest {
   championshipId: string
   matchId: string
-  status: 'IN_PROGRESS' | 'CANCELLED'
+  action: 'PAUSE' | 'RESUME'
 }
 
-export class UpdateMatchStatusUseCase {
+export class UpdateMatchTimerUseCase {
   constructor(
     private readonly championshipRepository: ChampionshipRepository,
     private readonly matchRepository: MatchRepository,
   ) {}
 
-  async execute(request: UpdateMatchStatusUseCaseRequest): Promise<{ match: Match }> {
+  async execute(request: UpdateMatchTimerUseCaseRequest): Promise<{ match: Match }> {
     const championship = await this.championshipRepository.findById(request.championshipId)
 
     if (!championship) {
@@ -27,29 +27,34 @@ export class UpdateMatchStatusUseCase {
       throw errorMessage.matchNotFound
     }
 
-    if (match.status === 'FINISHED') {
-      throw errorMessage.matchAlreadyFinished
+    if (match.status !== 'IN_PROGRESS') {
+      throw errorMessage.matchNotInProgress
     }
 
-    if (request.status === 'IN_PROGRESS') {
-      if (match.status !== 'SCHEDULED') {
-        throw errorMessage.matchCancelled
+    if (!match.startedAt) {
+      throw errorMessage.matchTimerUnavailable
+    }
+
+    if (request.action === 'PAUSE') {
+      if (match.pausedAt) {
+        throw errorMessage.matchTimerAlreadyPaused
       }
 
-      if (!match.homeTeamId || !match.awayTeamId) {
-        throw errorMessage.matchTeamsRequired
-      }
+      const updated = await this.matchRepository.update(request.matchId, {
+        pausedAt: new Date(),
+      })
+
+      return { match: updated }
     }
 
-    if (request.status === 'CANCELLED' && match.status === 'CANCELLED') {
-      throw errorMessage.matchCancelled
+    if (!match.pausedAt) {
+      throw errorMessage.matchTimerNotPaused
     }
 
+    const pauseDurationMs = Date.now() - match.pausedAt.getTime()
     const updated = await this.matchRepository.update(request.matchId, {
-      status: request.status,
-      ...(request.status === 'IN_PROGRESS'
-        ? { startedAt: new Date(), pausedAt: null, accumulatedPausedMs: 0 }
-        : {}),
+      pausedAt: null,
+      accumulatedPausedMs: match.accumulatedPausedMs + pauseDurationMs,
     })
 
     return { match: updated }

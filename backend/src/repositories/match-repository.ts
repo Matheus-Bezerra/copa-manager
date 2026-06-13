@@ -9,6 +9,8 @@ export interface Match {
   awayTeamId: string | null
   scheduledAt: Date | null
   startedAt: Date | null
+  pausedAt: Date | null
+  accumulatedPausedMs: number
   status: MatchStatus
   createdAt: Date
   updatedAt: Date
@@ -23,6 +25,8 @@ export interface CreateMatchInput {
   awayTeamId?: string | null
   scheduledAt?: Date | null
   startedAt?: Date | null
+  pausedAt?: Date | null
+  accumulatedPausedMs?: number
   status?: MatchStatus
 }
 
@@ -31,6 +35,8 @@ export interface UpdateMatchInput {
   awayTeamId?: string | null
   scheduledAt?: Date | null
   startedAt?: Date | null
+  pausedAt?: Date | null
+  accumulatedPausedMs?: number
   status?: MatchStatus
 }
 

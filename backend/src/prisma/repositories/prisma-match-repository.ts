@@ -77,6 +77,8 @@ export class PrismaMatchRepository implements MatchRepository {
         awayTeamId: match.awayTeamId,
         scheduledAt: match.scheduledAt,
         startedAt: match.startedAt,
+        pausedAt: match.pausedAt,
+        accumulatedPausedMs: match.accumulatedPausedMs,
         status: match.status,
         createdAt: match.createdAt,
         updatedAt: match.updatedAt,

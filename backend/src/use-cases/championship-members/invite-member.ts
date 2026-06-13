@@ -83,19 +83,27 @@ export class InviteMemberUseCase {
 
     const inviteUrl = `${env.APP_URL}/invitations/accept?token=${invitation.token}`;
 
-    await this.emailService.sendInvitationEmail({
-      to: request.email,
-      championshipName: championship.name,
-      role: request.role,
-      inviteUrl,
-      expiresAt,
-    });
+    let emailSent = true;
+
+    try {
+      await this.emailService.sendInvitationEmail({
+        to: request.email,
+        championshipName: championship.name,
+        role: request.role,
+        inviteUrl,
+        expiresAt,
+      });
+    } catch (error) {
+      emailSent = false;
+      console.warn('Invitation email delivery failed', error);
+    }
 
     return {
       invitation: {
         ...invitation,
         inviteUrl,
       },
+      emailSent,
     };
   }
 }

@@ -20,6 +20,7 @@ export const getPublicMatchSchema = {
         data: z.object({
           match: matchSchema,
           result: matchResultSchema.nullable(),
+          matchDuration: z.number().int().min(1),
         }),
       }),
     },

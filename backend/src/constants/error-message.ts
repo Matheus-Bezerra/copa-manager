@@ -95,6 +95,11 @@ export const errorMessage = {
     message: 'An invitation is already pending for this email',
     statusCode: 409,
   },
+  emailDeliveryFailed: {
+    code: 'EMAIL/DELIVERY_FAILED',
+    message: 'Unable to send email. Verify a domain in Resend or use your account email for testing.',
+    statusCode: 502,
+  },
   championshipInvitationNotFound: {
     code: 'CHAMPIONSHIP/INVITATION_NOT_FOUND',
     message: 'Invitation not found',
@@ -175,6 +180,26 @@ export const errorMessage = {
     message: 'Match has been cancelled',
     statusCode: 409,
   },
+  matchNotInProgress: {
+    code: 'MATCH/NOT_IN_PROGRESS',
+    message: 'Match timer can only be controlled while the match is in progress',
+    statusCode: 409,
+  },
+  matchTimerUnavailable: {
+    code: 'MATCH/TIMER_UNAVAILABLE',
+    message: 'Match timer is not available',
+    statusCode: 409,
+  },
+  matchTimerAlreadyPaused: {
+    code: 'MATCH/TIMER_ALREADY_PAUSED',
+    message: 'Match timer is already paused',
+    statusCode: 409,
+  },
+  matchTimerNotPaused: {
+    code: 'MATCH/TIMER_NOT_PAUSED',
+    message: 'Match timer is not paused',
+    statusCode: 409,
+  },
   stageInvalidFormat: {
     code: 'STAGE/INVALID_FORMAT',
     message: 'Stage format is required for GROUP_STAGE and must not be set for KNOCKOUT',
@@ -218,6 +243,16 @@ export const errorMessage = {
   matchKnockoutDrawRequiresPenalties: {
     code: 'MATCH/KNOCKOUT_DRAW_REQUIRES_PENALTIES',
     message: 'Knockout matches tied after regular time require penalty scores',
+    statusCode: 422,
+  },
+  matchPenaltyScoresNotAllowed: {
+    code: 'MATCH/PENALTY_SCORES_NOT_ALLOWED',
+    message: 'Penalty scores are only allowed when the match is tied after regular time',
+    statusCode: 422,
+  },
+  matchPenaltyScoresIncomplete: {
+    code: 'MATCH/PENALTY_SCORES_INCOMPLETE',
+    message: 'When penalty scores are provided, both teams must have a value',
     statusCode: 422,
   },
   matchEventNotAllowed: {
