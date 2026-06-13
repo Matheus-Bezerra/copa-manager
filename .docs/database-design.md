@@ -456,6 +456,8 @@ Partidas.
 * away_team_id
 * scheduled_at
 * started_at (nullable — preenchido quando status passa para IN_PROGRESS)
+* paused_at (nullable — preenchido enquanto o timer está pausado)
+* accumulated_paused_ms (default 0 — milissegundos acumulados em pausa)
 * status
 * created_at
 * updated_at
@@ -463,6 +465,7 @@ Partidas.
 ### Notes
 
 * `started_at` é definido automaticamente ao iniciar a partida (`status = IN_PROGRESS`) e usado pelo frontend para calcular o timer ao vivo.
+* `paused_at` e `accumulated_paused_ms` permitem pausar/retomar o timer com persistência entre sessões.
 * group_id é obrigatório quando a fase da rodada é GROUP_STAGE; nulo em fases KNOCKOUT.
 * O stage é derivado via round.stage_id.
 * Em fases `KNOCKOUT`, partidas podem ser criadas sem times (`home_team_id` / `away_team_id` nulos) como placeholder até avanço automático ou sorteio manual.

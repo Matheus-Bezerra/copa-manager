@@ -414,7 +414,7 @@ Não concede acesso direto aos recursos da API.
       "expiresAt": "2026-06-13T00:00:00.000Z",
       "acceptedAt": null,
       "createdAt": "2026-06-06T00:00:00.000Z",
-      "inviteUrl": "http://localhost:3000/invitations/accept?token=abc123..."
+      "inviteUrl": "http://localhost:5173/invitations/accept?token=abc123..."
     }
   }
 }
@@ -1101,6 +1101,8 @@ Cada item inclui os campos de `match` mais:
 | `awayTeamId` | string \| null | Time visitante |
 | `scheduledAt` | datetime \| null | Data/hora agendada |
 | `startedAt` | datetime \| null | Momento em que a partida foi iniciada (`IN_PROGRESS`) |
+| `pausedAt` | datetime \| null | Momento em que o timer foi pausado; `null` enquanto o tempo corre |
+| `accumulatedPausedMs` | number | Total de milissegundos em pausa acumulados desde o início |
 | `status` | enum | `SCHEDULED`, `IN_PROGRESS`, `FINISHED`, `CANCELLED` |
 
 ### Response (result object, nullable)
@@ -1143,6 +1145,37 @@ Retornado junto com `match`. `null` enquanto a partida não tiver resultado regi
 
 ---
 
+## Update Match Timer
+
+### PATCH
+
+```http
+/championships/{championshipId}/matches/{matchId}/timer
+```
+
+### Request
+
+```json
+{
+  "action": "PAUSE"
+}
+```
+
+Valores de `action`: `PAUSE`, `RESUME`.
+
+### Permission
+
+* Owner, Administrator, Organizer
+
+### Notes
+
+* Disponível apenas com `status = IN_PROGRESS`.
+* `PAUSE` congela o timer; `RESUME` retoma a contagem.
+* O tempo decorrido é calculado com `startedAt`, `pausedAt` e `accumulatedPausedMs`.
+* Ao atingir `matchDuration`, o frontend para a contagem em `00:00` (não entra em acréscimo automático).
+
+---
+
 ## Update Match
 
 ### PUT
@@ -1174,6 +1207,9 @@ Retornado junto com `match`. `null` enquanto a partida não tiver resultado regi
 
 ### Notes
 
+* `homePenaltyScore` e `awayPenaltyScore` só são aceitos quando `homeScore` = `awayScore` (empate no tempo regulamentar). Fora disso, devem ser omitidos ou `null`.
+* Em empate, os pênaltis são opcionais em fase `GROUP_STAGE`; se informado um lado, os dois são obrigatórios.
+* Em empate em fase `KNOCKOUT`, os pênaltis são obrigatórios (ambos os lados).
 * Ao encerrar partida de fase `KNOCKOUT`, dispara **avanço automático** do vencedor (e perdedor para 3º Lugar, quando configurado) para a partida vinculada na rodada seguinte.
 * Se todas as partidas de uma fase `GROUP_STAGE` estiverem encerradas, dispara **avanço automático** dos classificados para a primeira rodada da fase `KNOCKOUT` seguinte.
 * Alteração ou remoção de resultado deve recalcular vagas afetadas em cascata.
