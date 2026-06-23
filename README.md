@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://copa-manager.vercel.app/">
-    <img src="./assets/logo_full.png" alt="Copa Manager" width="180" />
+    <img src="./assets/logo_full.png" alt="Copa Manager" width="240" />
   </a>
 </p>
 
@@ -34,7 +34,7 @@ Acesse o app em produção:
 
 <p align="center">
   <a href="https://copa-manager.vercel.app/">
-    <img src="./assets/preview.png" alt="Painel administrativo do Copa Manager — visão geral do campeonato" width="480" />
+    <img src="./assets/preview.png" alt="Painel administrativo do Copa Manager — visão geral do campeonato" width="720" />
   </a>
 </p>
 
@@ -46,7 +46,7 @@ Acesse o app em produção:
 
 <p align="center">
   <a href="https://copa-manager.vercel.app/c/copa-do-mundo-ad-tatuape/standings">
-    <img src="./assets/preview_url_public.png" alt="Página pública do campeonato — classificação" width="480" />
+    <img src="./assets/preview_url_public.png" alt="Página pública do campeonato — classificação" width="720" />
   </a>
 </p>
 
